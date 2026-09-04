@@ -29,3 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Direction-aware layout semantics: `DirectionalEdgeInsets` (`leading`/`trailing`) and `HorizontalAlignment` with automatic physical coordinate resolution.
 - Thread-safe zero-allocation formatter cache: `LocaleFormatterCache` for date, number, and currency formatters.
 - Architecture Decision Record `ADR 0003: Unified Localization, Dynamic Type and Directional Layout`.
+- Immutable Virtual Render Tree (VRT): pure value types `RenderElement`, `ElementKind`, `ElementProps`, and `ElementID` (`typeName`, `key`, `siblingIndex`) completely decoupled from `CALayer` and host platform views.
+- Declarative Component API: `Component` protocol, `ComponentContext`, and `@resultBuilder ComponentBuilder` supporting empty blocks, optionals, conditionals (`if/else`), and loops.
+- Structural primitives: `Group` (inlined children with zero intermediate container nodes) and `Empty` (zero layout/visual footprint).
+- Keyed `ForEach` enforcing stable entity identifiers for dynamic data, with identity preservation across reordering.
+- P0 declarative component facade: `Text`, `Stack`, `HStack`, `VStack`, `Spacer`, `Rectangle`, `Circle`, and semantic placeholder `Icon`.
+- Copy-on-write modifier pipeline (`width`, `height`, `frame`, `padding`, `margin`, `background`, `opacity`, `zIndex`, `key`, `testID`) with deterministic accumulation and overriding precedence rules.
+- Visual tree debug serialization (`dumpTree()`) for developer diagnostics and test snapshot assertions.
+- Architecture Decision Record `ADR 0004: Virtual Render Tree (VRT) & Declarative Component API` and getting started guide.
