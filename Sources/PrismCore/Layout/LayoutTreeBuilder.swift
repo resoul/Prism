@@ -23,9 +23,13 @@ public enum LayoutTreeBuilder {
         // Dimensions
         if let w = resolved.width {
             style.width = .fixed(w)
+        } else if case .icon = element.kind, let sizeStr = element.props.custom["iconSize"], let val = Double(sizeStr) {
+            style.width = .fixed(val)
         }
         if let h = resolved.height {
             style.height = .fixed(h)
+        } else if case .icon = element.kind, let sizeStr = element.props.custom["iconSize"], let val = Double(sizeStr) {
+            style.height = .fixed(val)
         }
         style.minWidth = resolved.minWidth
         style.maxWidth = resolved.maxWidth
@@ -82,7 +86,13 @@ public enum LayoutTreeBuilder {
             return SpacerMeasurePolicy(minLength: minLength ?? 0, axis: .vertical)
 
         case .icon:
-            return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: 24)
+            let defaultSize: Double = {
+                if let sizeStr = element.props.custom["iconSize"], let val = Double(sizeStr) {
+                    return val
+                }
+                return 20
+            }()
+            return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: defaultSize)
 
         case .stack, .group, .empty, .custom, .portal:
             return nil

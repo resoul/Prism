@@ -44,7 +44,10 @@ let package = Package(
         .testTarget(
             name: "PrismCoreTests",
             dependencies: ["PrismCore"],
-            path: "Tests/PrismCoreTests"
+            path: "Tests/PrismCoreTests",
+            resources: [
+                .copy("Fixtures")
+            ]
         ),
 
         // MARK: - PrismUI

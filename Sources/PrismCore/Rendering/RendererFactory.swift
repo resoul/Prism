@@ -11,7 +11,9 @@ public enum RendererFactory {
             return TextRenderer(elementID: element.id)
         case .shape:
             return ShapeRenderer(elementID: element.id)
-        case .stack, .icon, .spacer, .custom, .group, .empty, .portal:
+        case .icon:
+            return IconRenderer(elementID: element.id)
+        case .stack, .spacer, .custom, .group, .empty, .portal:
             return ContainerRenderer(elementID: element.id)
         }
     }

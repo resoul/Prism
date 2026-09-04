@@ -39,11 +39,18 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
     case text(String)
     case shape(ShapeKind)
     case spacer(minLength: Double?)
-    case icon(name: String, bundle: String?)
+    case icon(source: IconSource)
     case group
     case empty
     case custom(String)
     case portal(targetLayer: OverlayLayer)
+
+    public static func icon(name: String, bundle: String? = nil) -> ElementKind {
+        if let bundle {
+            return .icon(source: .svg(named: name, bundle: bundle))
+        }
+        return .icon(source: .sf(name: name))
+    }
 
     public var description: String {
         switch self {
@@ -58,11 +65,8 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
                 return "Spacer(minLength: \(minLength))"
             }
             return "Spacer"
-        case .icon(let name, let bundle):
-            if let bundle {
-                return "Icon(name: \"\(name)\", bundle: \"\(bundle)\")"
-            }
-            return "Icon(\"\(name)\")"
+        case .icon(let source):
+            return "Icon(\(source))"
         case .group:
             return "Group"
         case .empty:
