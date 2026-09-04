@@ -44,3 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scale-aware `PixelRoundingPolicy` for subpixel antialiasing and hairline gap prevention.
 - Explicit invalidation lifecycle (`.clean`, `.layoutInvalidated`, `.measureInvalidated`) and developer diagnostic data (`LayoutDebugData`).
 - Architecture Decision Record `ADR 0005: Two-Pass Layout Engine Architecture & Constraint Resolution` and layout constraints guide.
+- Flexbox layout engine (`FlexSolver`): main and cross axis solvers, direction (`row`, `column`, `rowReverse`, `columnReverse`), `justifyContent` (`start`, `center`, `end`, `spaceBetween`, `spaceAround`, `spaceEvenly`), `alignItems` and `alignSelf` (`start`, `center`, `end`, `stretch`, `baseline`), and gap distributions.
+- Flexible space distribution with `flexGrow` and overflow absorption with `flexShrink`.
+- Multi-line flex wrapping (`flexWrap: .wrap`) with line cross gap spacing.
+- Multi-model positioning: `.flow`, `.absolute` (with `top`, `leading`, `bottom`, `trailing` offsets and containing block resolution), `.fixed` (viewport-relative), and `zIndex` stacking order; absolute children do not expand flow container dimensions.
+- Formatted layout tree trace diagnostics (`LayoutTrace.dump` / `node.dumpTrace()`).
+- Architecture Decision Record `ADR 0006: Flexbox Layout Engine & Multi-Model Positioning` and flex layout guide.
