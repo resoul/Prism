@@ -283,4 +283,37 @@ extension RenderElement {
         copy.modifiers.append(.animation(animation))
         return copy
     }
+
+    /// Applies an anti-aliased Signed Distance Field rounded rectangle effect.
+    /// On devices without Metal support, falls back gracefully to standard CALayer cornerRadius and borderWidth.
+    public func sdfRoundedRect(
+        cornerRadius: Double,
+        borderWidth: Double = 0,
+        borderColor: Color = .clear,
+        fill: Color? = nil
+    ) -> RenderElement {
+        var copy = self
+        copy.modifiers.append(.sdfRoundedRect(cornerRadius: cornerRadius, borderWidth: borderWidth, borderColor: borderColor, fill: fill))
+        return copy
+    }
+
+    /// Applies a frosted glassmorphism effect with blur, saturation boost, and tint overlay.
+    /// On devices without Metal support, falls back to a tinted semi-transparent overlay.
+    public func glassmorphism(
+        blurRadius: Double = 20,
+        tint: Color = Color(red: 1, green: 1, blue: 1, alpha: 0.2),
+        saturation: Double = 1.2
+    ) -> RenderElement {
+        var copy = self
+        copy.modifiers.append(.glassmorphism(blurRadius: blurRadius, tint: tint, saturation: saturation))
+        return copy
+    }
+
+    /// Applies a multi-color mesh gradient effect.
+    /// On devices without Metal support, falls back to a multi-stop linear gradient.
+    public func meshGradient(_ grid: MeshGradientGrid) -> RenderElement {
+        var copy = self
+        copy.modifiers.append(.meshGradient(grid))
+        return copy
+    }
 }

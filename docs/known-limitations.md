@@ -26,3 +26,10 @@ The following limitations are known and expected during the package foundation p
 6. **Localization & RTL:**
    - Supported string file formats: standard `Localizable.strings`, `Localizable.stringsdict`, and registered in-memory tables. Advanced `.xcstrings` catalog resolution delegates to the host app bundle.
    - RTL mirroring is applied to directional layouts (`leading`/`trailing`). Non-directional absolute offsets (`left`/`right`) remain fixed in physical space.
+
+7. **Optional Metal Renderer & Visual Effects (Phase 04):**
+   - Metal rendering is an optional acceleration backend. On environments where `MTLDevice` is not available (e.g. headless CI runners, simulators without Metal support, or when simulated-unsupported is toggled), Prism automatically falls back to standard `CALayer` approximations:
+     - SDF Rounded Rectangles fall back to standard `CALayer.cornerRadius` and `borderWidth`.
+     - Glassmorphism falls back to a tinted semi-transparent overlay.
+     - Mesh Gradients fall back to multi-stop `CAGradientLayer`s.
+   - Dynamic complex geometry mesh gradients are clamped to $N \times M$ control grids and evaluated via bilinear interpolation.

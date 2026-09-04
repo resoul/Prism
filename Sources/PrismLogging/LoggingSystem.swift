@@ -55,6 +55,16 @@ public final class LoggingSystem: @unchecked Sendable {
     public func metrics() async -> LoggingMetrics { await pipeline.metrics() }
 }
 
+extension PrismLogging {
+    public static let shared: LoggingSystem = LoggingSystem {
+        ConsoleSink(minimumLevel: .info)
+    }
+
+    public static let render: Logger = shared.logger(category: .renderer)
+    public static let performance: Logger = shared.logger(category: .performance)
+}
+
+
 public struct Logger: Sendable {
     public let category: LogCategory
     private let system: LoggingSystem
