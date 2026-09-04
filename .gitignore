@@ -1,0 +1,18 @@
+# Local agent and planning files (never commit)
+AGENTS.md
+IMPLEMENTATION_PLAN.md
+IMPLEMENTATION_TASKS/
+APP_AUTHORING_CONTRACT.md
+MODULE_CONTRACT.md
+DOCUMENTATION_CONTRACT.md
+
+# Swift Package Manager & Build artifacts
+.build/
+.swiftpm/
+Packages/
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+
+# OS artifacts
+.DS_Store
