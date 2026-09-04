@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture Decision Record `ADR 0001: Encapsulation of Platform UI Frameworks Behind Pure Prism Abstractions`.
 - Element identity foundation (`ElementID`) supporting type, explicit key, and sibling position.
 - Selective import guarantees and package verification test suites.
+- `PrismLogging`: structured Console, OSLog and opt-in rotating NDJSON file sinks with category filters, privacy redaction, trace context and bounded asynchronous delivery.
