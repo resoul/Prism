@@ -16,3 +16,4 @@ DerivedData/
 
 # OS artifacts
 .DS_Store
+Package.resolved
