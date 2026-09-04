@@ -1,5 +1,8 @@
 # 0.x Release Checklist
 
+See [Release Scope and Evidence Audit](release-scope-audit.md) for the
+implemented/partial/unverified matrix and active release blockers.
+
 - [ ] `swift test` and `./scripts/check_build.sh` pass from a clean checkout.
 - [ ] Build iOS, iPadOS, macOS, and tvOS targets; record unavailable environments rather than treating them as passed.
 - [ ] Run `CatalogReleaseTests`, component snapshots, accessibility screen, and fresh-consumer `import PrismUI` compile check.

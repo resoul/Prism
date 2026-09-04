@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Added a release-scope evidence audit for original Tasks 01–21, including
+  reproducible platform, accessibility, visual, and performance gaps.
+
 ### Added
 - Release-gate artifacts: executable P0/P1/P2 catalog manifest, catalog tests, first-app and architecture docs, baseline procedure, 0.x release checklist, MIT licence, and dependency notice.
 - P2 overlay, feedback, and navigation APIs: toast queueing/deduplication, progress, breadcrumbs, pagination, navigation menus, and semantic modal/floating overlay surfaces with deterministic single-modal coordination.
