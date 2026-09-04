@@ -96,20 +96,15 @@ public final class LayoutNode: @unchecked Sendable {
         if let policy = measurePolicy {
             computedSize = policy.measure(style: style, constraint: constraint)
         } else if children.isEmpty {
-            computedSize = ConstraintResolver.resolveSize(style: style, constraint: constraint, intrinsic: .zero)
+            let paddingH = style.padding.leading + style.padding.trailing
+            let paddingV = style.padding.top + style.padding.bottom
+            computedSize = ConstraintResolver.resolveSize(
+                style: style,
+                constraint: constraint,
+                intrinsic: MeasuredSize(width: paddingH, height: paddingV)
+            )
         } else {
-            // Container default measure: size that accommodates measured children
-            var maxChildW: Double = 0
-            var maxChildH: Double = 0
-
-            for child in children {
-                let childSize = child.measure(constraint: constraint)
-                maxChildW = max(maxChildW, childSize.width)
-                maxChildH = max(maxChildH, childSize.height)
-            }
-
-            let intrinsic = MeasuredSize(width: maxChildW, height: maxChildH)
-            computedSize = ConstraintResolver.resolveSize(style: style, constraint: constraint, intrinsic: intrinsic)
+            computedSize = FlexSolver.measureContainer(node: self, constraint: constraint)
         }
 
         self.measuredSize = computedSize
@@ -125,12 +120,16 @@ public final class LayoutNode: @unchecked Sendable {
 
     // MARK: - Pass 2: Layout
 
-    /// Assigns the final layout frame and updates invalidation state to clean.
+    /// Assigns the final layout frame, positions children, and updates invalidation state to clean.
     public func layout(frame: LayoutFrame, roundingPolicy: PixelRoundingPolicy = PixelRoundingPolicy()) {
         let roundedFrame = roundingPolicy.roundFrame(frame)
         self.layoutFrame = roundedFrame
         self.debugData.assignedFrame = roundedFrame
         self.invalidationState = .clean
+
+        if !children.isEmpty {
+            FlexSolver.layoutContainer(node: self, frame: roundedFrame, roundingPolicy: roundingPolicy)
+        }
     }
 
     // MARK: - Invalidation Contract
