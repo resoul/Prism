@@ -1,5 +1,10 @@
 # Prism — Known Limitations
 
+## Release-gate platform gaps
+
+- Automated package tests run on macOS. iOS/iPadOS/tvOS host interaction, snapshots, full VoiceOver, Switch Control, and Instruments evidence must be completed in the release checklist before a tagged release.
+- The catalog verifies example/state/documentation coverage at the render-tree level. Pixel snapshots and native accessibility adapters remain host-level validation.
+
 ## Phase 05 / Task 20
 
 - Toast timeout scheduling and native screen-reader delivery are owned by the host; `ToastCenter` provides deterministic queue and announcement state only.

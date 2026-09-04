@@ -67,6 +67,11 @@ import PrismUI
 
 ## Guides
 
+- [First app](docs/getting-started/first-app.md)
+- [Architecture overview](docs/architecture/overview.md)
+- [Executable component catalog](docs/components/catalog.md)
+- [Release performance baseline](docs/performance/release-baseline.md)
+- [0.x release checklist and compatibility policy](docs/release-checklist.md)
 - [Structured logging, privacy and support-file retention](docs/guides/logging.md)
 - [Known limitations](docs/known-limitations.md)
 - [Architecture decisions](docs/adr/)
@@ -96,3 +101,7 @@ swift test
 # Run build verification script (macOS build, iOS simulator build check, selective import verification)
 ./scripts/check_build.sh
 ```
+
+## Release status
+
+The current package is pre-1.0 (`0.x`). Review the [release checklist](docs/release-checklist.md), [known limitations](docs/known-limitations.md), and supported-platform matrix above before adopting a build. Prism's MIT license and dependency attribution are in [LICENSE](LICENSE) and [NOTICE](NOTICE).
