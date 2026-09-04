@@ -45,6 +45,8 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
     case custom(String)
     case portal(targetLayer: OverlayLayer)
     case textEditor(mode: TextInputMode, multiline: Bool)
+    case scrollArea(axis: ScrollAxis)
+    case image(source: ImageSource)
 
     public static func icon(name: String, bundle: String? = nil) -> ElementKind {
         if let bundle {
@@ -78,6 +80,10 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
             return "Portal(targetLayer: \(targetLayer.rawValue))"
         case .textEditor(let mode, let multiline):
             return "TextEditor(mode: \(mode.rawValue), multiline: \(multiline))"
+        case .scrollArea(let axis):
+            return "ScrollArea(axis: \(axis.rawValue))"
+        case .image(let source):
+            return "Image(\(source))"
         }
     }
 }
