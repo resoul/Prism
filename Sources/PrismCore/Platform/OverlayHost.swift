@@ -120,6 +120,8 @@ public final class OverlayHost {
     public let backdropLayer: CALayer = CALayer()
 
     public private(set) var activeEntries: [ElementID: OverlayEntry] = [:]
+    /// Presentation order is explicit: dictionary iteration must never choose the top overlay.
+    public private(set) var presentationOrder: [ElementID] = []
     public private(set) var activePortals: [ElementID: (layer: OverlayLayer, node: MountedNode)] = [:]
     public weak var engine: PrismHostEngine?
 
@@ -207,7 +209,16 @@ public final class OverlayHost {
 
     /// Presents a new overlay entry into its target tier.
     public func present(_ entry: OverlayEntry) {
+        // Prism deliberately permits only one blocking modal. Replacing it first guarantees
+        // that focus, backdrop, and accessibility ownership never become ambiguous.
+        if entry.layer == .modal {
+            for existingID in presentationOrder where activeEntries[existingID]?.layer == .modal {
+                dismiss(id: existingID, reason: .explicitClose)
+            }
+        }
+        presentationOrder.removeAll { $0 == entry.id }
         activeEntries[entry.id] = entry
+        presentationOrder.append(entry.id)
         let targetContainer = containerLayer(for: entry.layer)
 
         if entry.node.rootLayer.superlayer !== targetContainer {
@@ -230,6 +241,7 @@ public final class OverlayHost {
     /// Dismisses an overlay entry with a specified reason, restoring focus and cleaning up layers.
     public func dismiss(id: ElementID, reason: DismissReason = .explicitClose) {
         guard let entry = activeEntries.removeValue(forKey: id) else { return }
+        presentationOrder.removeAll { $0 == id }
 
         entry.onDismiss?(reason)
         entry.node.unmount()
@@ -251,7 +263,7 @@ public final class OverlayHost {
     /// Dismisses the top-most active modal when the Escape key is pressed.
     @discardableResult
     public func handleEscapeKey() -> Bool {
-        if let topModal = activeEntries.values.filter({ $0.layer == .modal }).last {
+        if let topModal = presentationOrder.reversed().compactMap({ activeEntries[$0] }).first(where: { $0.layer == .modal }) {
             dismiss(id: topModal.id, reason: .escapeKey)
             return true
         }
@@ -261,8 +273,7 @@ public final class OverlayHost {
     /// Handles pointer taps on the modal backdrop.
     @discardableResult
     public func handleBackdropTap() -> Bool {
-        let activeModals = activeEntries.values.filter { $0.layer == .modal }
-        guard let topModal = activeModals.last, topModal.blocksBackgroundPointer else {
+        guard let topModal = presentationOrder.reversed().compactMap({ activeEntries[$0] }).first(where: { $0.layer == .modal }), topModal.blocksBackgroundPointer else {
             return false
         }
         dismiss(id: topModal.id, reason: .backdropTap)
@@ -369,6 +380,7 @@ public final class OverlayHost {
             entry.node.rootLayer.removeFromSuperlayer()
         }
         activeEntries.removeAll()
+        presentationOrder.removeAll()
         activePortals.removeAll()
         backdropLayer.removeFromSuperlayer()
         contentContainer.removeFromSuperlayer()

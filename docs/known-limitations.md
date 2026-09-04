@@ -1,5 +1,11 @@
 # Prism — Known Limitations
 
+## Phase 05 / Task 20
+
+- Toast timeout scheduling and native screen-reader delivery are owned by the host; `ToastCenter` provides deterministic queue and announcement state only.
+- Native long-press/right-click dispatch, safe-area insets, and visual transition snapshots require iOS/macOS host UI test environments.
+- The one-active-modal policy intentionally replaces an existing modal; nested modal stacks are not supported.
+
 ## Phase 05 / Task 19
 
 - `Select` currently models a single, non-searchable selection. Searchable menus and general multi-select popovers are planned P3 work.
