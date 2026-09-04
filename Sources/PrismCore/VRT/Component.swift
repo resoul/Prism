@@ -173,6 +173,10 @@ extension Component {
         render().accessibilityTraits(traits)
     }
 
+    public func accessibilityElement(label: String, role: String? = nil) -> RenderElement {
+        render().accessibilityElement(label: label, role: role)
+    }
+
     public func focusable(_ isFocusable: Bool = true, order: Int? = nil) -> RenderElement {
         render().focusable(isFocusable, order: order)
     }
