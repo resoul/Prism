@@ -31,7 +31,10 @@ public final class PrismHostEngine {
 
     public var bounds: CGRect = .zero {
         didSet {
-            if oldValue != bounds { render() }
+            if oldValue != bounds {
+                overlayHost.updateBounds(bounds)
+                render()
+            }
         }
     }
 
@@ -47,6 +50,8 @@ public final class PrismHostEngine {
     public let focusTree: FocusTree = FocusTree()
     public let accessibilityTree: AccessibilityTree = AccessibilityTree()
     public let shortcutRegistry: KeyboardShortcutRegistry = KeyboardShortcutRegistry()
+    public let overlayHost: OverlayHost = OverlayHost()
+    public let anchorRegistry: AnchorRegistry = AnchorRegistry()
 
     public private(set) var rootLayoutNode: LayoutNode?
     public private(set) weak var hostLayer: CALayer?
@@ -60,12 +65,14 @@ public final class PrismHostEngine {
         self.rootMountedNode = MountedNode(element: normalized, renderer: renderer)
         self.inspectorLayer.name = "PrismInspectorOverlay"
         self.focusTree.rootNode = rootMountedNode
+        self.overlayHost.engine = self
+        self.rootMountedNode.overlayHost = self.overlayHost
     }
 
     /// Attaches the Prism root CALayer into the host platform view's backing layer.
     public func mount(in containerLayer: CALayer) {
         self.hostLayer = containerLayer
-        rootMountedNode.mount(superlayer: containerLayer)
+        rootMountedNode.mount(superlayer: containerLayer, overlayHost: overlayHost)
         focusTree.rootNode = rootMountedNode
         render()
     }
@@ -120,6 +127,11 @@ public final class PrismHostEngine {
         focusTree.rootNode = rootMountedNode
         accessibilityTree.update(from: rootMountedNode)
 
+        // Synchronize AnchorRegistry and Overlays
+        anchorRegistry.update(from: rootMountedNode)
+        overlayHost.updateBounds(bounds)
+        overlayHost.updateOverlayPositions()
+
         updateInspectorOverlay()
     }
 
@@ -151,6 +163,7 @@ public final class PrismHostEngine {
 
     /// Detaches layers, unmounts mounted tree, resets event states, and destroys renderers cleanly.
     public func teardown() {
+        overlayHost.teardown()
         inspectorLayer.removeFromSuperlayer()
         inspectorLayer.sublayers?.removeAll()
         rootRenderer.destroy()
@@ -179,6 +192,10 @@ public final class PrismHostEngine {
             eventDispatcher.handlePointerMove(location: location, root: rootMountedNode, modifiers: modifiers)
             return .handled
         case .pointerDown:
+            let hit = HitTester.hitTest(point: location, root: rootMountedNode, overlayHost: overlayHost)
+            if hit == nil && overlayHost.handleBackdropTap() {
+                return .handled
+            }
             return eventDispatcher.handlePointerDown(
                 location: location,
                 root: rootMountedNode,
@@ -197,7 +214,7 @@ public final class PrismHostEngine {
                 clickCount: clickCount
             )
         default:
-            guard let hit = HitTester.hitTest(point: location, root: rootMountedNode) else { return .ignored }
+            guard let hit = HitTester.hitTest(point: location, root: rootMountedNode, overlayHost: overlayHost) else { return .ignored }
             let localPoint = hit.convertToLocal(pointInHost: location)
             let data = PointerEventData(
                 location: localPoint,
@@ -232,9 +249,16 @@ public final class PrismHostEngine {
             isRepeat: isRepeat
         )
 
+        // 0. Escape key overlay dismissal
+        if type == .keyDown && (key == "Escape" || keyCode == 53) {
+            if overlayHost.handleEscapeKey() {
+                return .handled
+            }
+        }
+
         let targetNode: MountedNode
         if let focusedID = focusTree.currentFocus,
-           let focusedNode = findNode(by: focusedID, in: rootMountedNode) {
+           let focusedNode = findNode(by: focusedID) {
             targetNode = focusedNode
         } else {
             targetNode = rootMountedNode
@@ -269,7 +293,8 @@ public final class PrismHostEngine {
         phase: ScrollPhase = .changed,
         modifiers: EventModifiers = .none
     ) -> EventResult {
-        guard let hit = HitTester.hitTest(point: location, root: rootMountedNode) else { return .ignored }
+        overlayHost.updateOverlayPositions()
+        guard let hit = HitTester.hitTest(point: location, root: rootMountedNode, overlayHost: overlayHost) else { return .ignored }
         let scrollData = ScrollEventData(
             location: hit.convertToLocal(pointInHost: location),
             deltaX: deltaX,
@@ -279,6 +304,36 @@ public final class PrismHostEngine {
         )
         let event = Event(type: .scroll, targetID: hit.id, payload: .scroll(scrollData))
         return eventDispatcher.dispatch(event: event, target: hit)
+    }
+
+    /// Recursively locates a mounted node by its element identifier in either the content tree or active overlays.
+    public func findNode(by id: ElementID) -> MountedNode? {
+        if let match = findNode(by: id, in: rootMountedNode) {
+            return match
+        }
+        for entry in overlayHost.activeEntries.values {
+            if let match = findNode(by: id, in: entry.node) {
+                return match
+            }
+        }
+        return nil
+    }
+
+    /// Returns the active mounted node for a given anchor identifier.
+    public func findNodeByAnchor(_ anchorID: String) -> MountedNode? {
+        anchorRegistry.node(for: anchorID)
+    }
+
+    /// Recomputes positions for all active anchored overlays (e.g. after dynamic scroll or resize).
+    public func invalidateOverlayPositions() {
+        anchorRegistry.update(from: rootMountedNode)
+        overlayHost.updateBounds(bounds)
+        overlayHost.updateOverlayPositions()
+    }
+
+    /// Development diagnostics for duplicate testIDs in the tree.
+    public var testIDConflicts: [TestIDConflict] {
+        TestIDValidator.findConflicts(in: rootMountedNode)
     }
 
     private func findNode(by id: ElementID, in root: MountedNode) -> MountedNode? {

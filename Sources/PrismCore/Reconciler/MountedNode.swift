@@ -20,6 +20,7 @@ public final class MountedNode {
     public let effectScope: EffectScope = EffectScope()
     public private(set) var isMounted: Bool = false
     public internal(set) var frame: LayoutFrame = .zero
+    public weak var overlayHost: OverlayHost?
 
     public typealias EventHandler = @MainActor (Event) -> Void
     public private(set) var eventHandlers: [EventType: [EventHandler]] = [:]
@@ -32,11 +33,19 @@ public final class MountedNode {
     }
 
     /// Mounts this node into the parent hierarchy, attaches its CALayer, and triggers .onAppear.
-    public func mount(in parentNode: MountedNode? = nil, superlayer: CALayer? = nil) {
+    public func mount(in parentNode: MountedNode? = nil, superlayer: CALayer? = nil, overlayHost: OverlayHost? = nil) {
         self.parent = parentNode
+        self.overlayHost = overlayHost ?? parentNode?.overlayHost
         self.isMounted = true
 
-        let targetSuperlayer = superlayer ?? parentNode?.rootLayer
+        let targetSuperlayer: CALayer?
+        if case .portal(let targetLayer) = element.kind, let host = self.overlayHost {
+            targetSuperlayer = host.containerLayer(for: targetLayer)
+            host.registerPortal(node: self, layer: targetLayer)
+        } else {
+            targetSuperlayer = superlayer ?? parentNode?.rootLayer
+        }
+
         if let targetSuperlayer, rootLayer.superlayer !== targetSuperlayer {
             targetSuperlayer.addSublayer(rootLayer)
         }
@@ -48,6 +57,13 @@ public final class MountedNode {
     public func update(newElement: RenderElement, frame: LayoutFrame, context: RenderContext) {
         self.element = newElement
         self.frame = frame
+        if case .portal(let targetLayer) = newElement.kind, let host = self.overlayHost {
+            let targetSuperlayer = host.containerLayer(for: targetLayer)
+            host.registerPortal(node: self, layer: targetLayer)
+            if rootLayer.superlayer !== targetSuperlayer {
+                targetSuperlayer.addSublayer(rootLayer)
+            }
+        }
         renderer.update(element: newElement, frame: frame, context: context)
     }
 
@@ -66,9 +82,17 @@ public final class MountedNode {
 
     /// Computes the node's origin and bounds in root host coordinates.
     public var globalFrame: CGRect {
+        if case .portal = element.kind {
+            return CGRect(x: frame.origin.x, y: frame.origin.y, width: frame.width, height: frame.height)
+        }
         var origin = CGPoint(x: frame.origin.x, y: frame.origin.y)
         var current = parent
         while let p = current {
+            if case .portal = p.element.kind {
+                origin.x += p.frame.origin.x
+                origin.y += p.frame.origin.y
+                break
+            }
             origin.x += p.frame.origin.x
             origin.y += p.frame.origin.y
             current = p.parent
@@ -146,6 +170,10 @@ public final class MountedNode {
     public func unmount() {
         guard isMounted else { return }
         isMounted = false
+
+        if case .portal = element.kind {
+            overlayHost?.unregisterPortal(id: id)
+        }
 
         // 1. Run disappear callbacks and cancel all active effects and subscriptions
         effectScope.triggerDisappear()

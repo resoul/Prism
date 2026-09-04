@@ -84,7 +84,7 @@ public enum LayoutTreeBuilder {
         case .icon:
             return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: 24)
 
-        case .stack, .group, .empty, .custom:
+        case .stack, .group, .empty, .custom, .portal:
             return nil
         }
     }

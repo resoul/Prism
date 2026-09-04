@@ -57,7 +57,11 @@ public final class ContainerRenderer: LayerRenderer {
                     renderer = existing
                 } else {
                     renderer = RendererFactory.create(for: childElement)
-                    rootLayer.addSublayer(renderer.rootLayer)
+                    if case .portal = childElement.kind {
+                        // Portals project their layers into OverlayHost containers, not parent container layer
+                    } else {
+                        rootLayer.addSublayer(renderer.rootLayer)
+                    }
                 }
 
                 renderer.update(element: childElement, frame: childFrame, context: context)
