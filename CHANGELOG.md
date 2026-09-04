@@ -64,3 +64,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Developer runtime inspector overlay (`isInspectorOverlayEnabled`) drawing layout wireframe boundaries, plus structured diagnostics dump (`engine.dumpDiagnostics()`).
 - Host lifecycle test suite: 20-pass create/destroy cycles with zero layer accumulation or retention.
 - Architecture Decision Record `ADR 0008: Platform Host Views, Host Engine, and Cross-Platform Smoke Verification` and platform host & smoke test guide.
+- Persistent `MountedNode` hierarchy with owned `LayerRenderer`/`CALayer`, parent/child traversal, and isolated `SubscriptionBag` for lifecycle-scoped Flux cancellation.
+- `Reconciler.diff` computing minimal patch sets (`NodePatch`): in-place updates with layer reuse, insertions, removals, keyed moves, and type replacements.
+- Keyed sibling reconciliation with duplicate key detection, plus unkeyed sibling sequential fallback and mutation warnings.
+- Topological patch application: removals/unmounts -> updates/replaces with layer reuse -> insertions/mounts -> two-pass layout -> CALayer frame synchronization.
+- Reactive state-binding layer (`MountedNode.bind(to:)` / `ReactiveBinding`) over Flux `CurrentValue`, `CurrentValueDistinct`, and generic `Flux` streams on `@MainActor`.
+- High-frequency update coalescing (`UpdateCoalescer`) buffering rapid state bursts (100+ updates) into a single frame pass while strictly delivering the final settled value.
+- Comprehensive developer reconciliation diff log (`ReconcilerDiff`) with counters for mounts, updates, unmounts, moves, and reused layers.
+- Architecture Decision Record `ADR 0009: VRT Reconciler, MountedNode Lifecycle, and Flux-Driven Reactivity` and reconciler guide.
