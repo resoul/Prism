@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Release-gate artifacts: executable P0/P1/P2 catalog manifest, catalog tests, first-app and architecture docs, baseline procedure, 0.x release checklist, MIT licence, and dependency notice.
 - P2 overlay, feedback, and navigation APIs: toast queueing/deduplication, progress, breadcrumbs, pagination, navigation menus, and semantic modal/floating overlay surfaces with deterministic single-modal coordination.
 - P2 data-entry components: `ButtonGroup`, `NumberField`, `ToggleGroup`, `Slider`, `RangeSlider`, `Stepper`, `Rating`, `InputGroup`, `Select`, and `NativeSelect`, with shared Binding-based range and selection semantics.
 - Initial Swift Package structure supporting iOS 16+, macOS 14+, and tvOS 17+.
