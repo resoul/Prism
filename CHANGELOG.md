@@ -37,3 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Copy-on-write modifier pipeline (`width`, `height`, `frame`, `padding`, `margin`, `background`, `opacity`, `zIndex`, `key`, `testID`) with deterministic accumulation and overriding precedence rules.
 - Visual tree debug serialization (`dumpTree()`) for developer diagnostics and test snapshot assertions.
 - Architecture Decision Record `ADR 0004: Virtual Render Tree (VRT) & Declarative Component API` and getting started guide.
+- Two-pass layout engine foundation: `LayoutNode`, `LayoutStyle`, `SizeValue` (`fixed`, `fraction`, `intrinsic`, `fill`, `range`), `SizeConstraint` (`unspecified`, `atMost`, `exactly`), `MeasuredSize`, `LayoutFrame`, and `EdgeValues`.
+- Dimension constraints resolver with min/max clamping, conflicting constraint arbitration (`min > max` where min takes precedence), and prohibition of NaN, negative sizes, and infinite dimensions.
+- CoreText leaf measurement engine (`TextMeasurePolicy`) with multi-line wrapping, line limits, custom line heights, and Unicode/emoji support.
+- Shape (`Rectangle`/`Circle`) and `Spacer` leaf measurement policies.
+- Scale-aware `PixelRoundingPolicy` for subpixel antialiasing and hairline gap prevention.
+- Explicit invalidation lifecycle (`.clean`, `.layoutInvalidated`, `.measureInvalidated`) and developer diagnostic data (`LayoutDebugData`).
+- Architecture Decision Record `ADR 0005: Two-Pass Layout Engine Architecture & Constraint Resolution` and layout constraints guide.
