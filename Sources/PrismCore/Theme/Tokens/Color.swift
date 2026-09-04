@@ -65,6 +65,11 @@ public struct Color: Hashable, Sendable, CustomStringConvertible {
         }
     }
 
+    /// Convenience initializer creating a Color from a hex string.
+    public init(hex: String) {
+        self = Color.hex(hex)
+    }
+
     /// Creates a Color from a hex string or throws an error if invalid.
     public init(validatingHex hexString: String) throws {
         var cleanHex = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -115,6 +120,19 @@ public struct Color: Hashable, Sendable, CustomStringConvertible {
     public static let clear = Color(red: 0, green: 0, blue: 0, alpha: 0)
     public static let black = Color(red: 0, green: 0, blue: 0, alpha: 1)
     public static let white = Color(red: 1, green: 1, blue: 1, alpha: 1)
+
+    /// Hexadecimal string representation in `#RRGGBB` or `#RRGGBBAA` format.
+    public var hexString: String {
+        let r = Int(round(red * 255))
+        let g = Int(round(green * 255))
+        let b = Int(round(blue * 255))
+        let a = Int(round(alpha * 255))
+        if a == 255 {
+            return String(format: "#%02X%02X%02X", r, g, b)
+        } else {
+            return String(format: "#%02X%02X%02X%02X", r, g, b, a)
+        }
+    }
 }
 
 public enum ColorHexError: Error, Equatable, Sendable {

@@ -99,3 +99,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public `.testID(String)` modifier on `RenderElement` and `Component` with development diagnostics (`TestIDValidator`, `TestIDConflict`) for duplicate test ID detection and automated UI test lookup.
 - Reverse-z overlay hit testing in `HitTester` evaluating tiers in top-down order (`debug` -> `toast` -> `modal` -> `floating` -> `content`) and blocking background pointer events during modal presentation.
 - Architecture Decision Record `ADR 0012: OverlayHost, Portal Projection, and Component Testability` and overlay host & portal guide.
+- Unified `IconSource` supporting `.sf(name:)`, `.svg(named:bundle:)`, `.svgURL(URL)`, `.path(CGPath, viewBox: CGRect)`, and `.raster(named:bundle:)`.
+- Standardized icon modifiers: `.iconSize(IconSize | Double)`, `.iconColor(Color)`, `.iconWeight(IconWeight)`, and `.renderingMode(IconRenderingMode)`.
+- Safe XML parser for SVG vector graphics subset supporting `<path>`, `<rect>`, `<circle>`, `<ellipse>`, `<line>`, `<polyline>`, `<polygon>`, `<g>`, `viewBox`, fill, stroke, stroke-width, opacity, and 2D transforms.
+- W3C-compliant path data parser (`SVGPathParser`) with elliptical arc to cubic bezier subdivision and token scanner.
+- Strict security rejection of XML external entities, `<script>`, `<style>`, `<foreignObject>`, `<filter>`, `<text>`, and external URLs with structured `SVGDiagnostic` emission and typed `SVGError.securityViolation`.
+- Platform-internal bridge (`SFSymbolAdapter`) rendering Apple SF Symbols to `CGImage` without exposing AppKit or UIKit in public API.
+- Dedicated `IconRenderer: LayerRenderer` visualizing vector SVGs via GPU-accelerated `CAShapeLayer` hierarchies and symbol bitmaps via `CALayer.contents`.
+- Thread-safe `IconCache` with bounded capacity and automatic disk modification date invalidation.
+- `IconRegistry` for registering named icon packs, asset directories, and collision policies (`.overwrite`, `.ignore`, `.error`).
+- `Icon` component primitive in `PrismUI` with semantic static factory helpers (`Icon.sf`, `Icon.svg`, `Icon.path`, `Icon.raster`).
+- Architecture Decision Record `ADR 0013: Icon System and Safe SVG Subset` and icon system & SVG developer guide.
