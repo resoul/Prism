@@ -44,6 +44,7 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
     case empty
     case custom(String)
     case portal(targetLayer: OverlayLayer)
+    case textEditor(mode: TextInputMode, multiline: Bool)
 
     public static func icon(name: String, bundle: String? = nil) -> ElementKind {
         if let bundle {
@@ -75,6 +76,8 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
             return "Custom(\(name))"
         case .portal(let targetLayer):
             return "Portal(targetLayer: \(targetLayer.rawValue))"
+        case .textEditor(let mode, let multiline):
+            return "TextEditor(mode: \(mode.rawValue), multiline: \(multiline))"
         }
     }
 }

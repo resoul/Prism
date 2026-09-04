@@ -110,3 +110,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IconRegistry` for registering named icon packs, asset directories, and collision policies (`.overwrite`, `.ignore`, `.error`).
 - `Icon` component primitive in `PrismUI` with semantic static factory helpers (`Icon.sf`, `Icon.svg`, `Icon.path`, `Icon.raster`).
 - Architecture Decision Record `ADR 0013: Icon System and Safe SVG Subset` and icon system & SVG developer guide.
+- CoreText-driven text editing engine: `TextDocument` managing text mutations, UTF-16 and Swift String index bridging, `TextSelection` ranges, composing/marked IME text, and Foundation `UndoManager` integration.
+- `TextEditorMetrics` CoreText measurement engine calculating line fragments, character rects, caret geometry, and hit-testing (point-to-index).
+- `TextEditorRenderer: LayerRenderer` managing pure CALayer rendering: textLayer, selectionLayer, caretLayer with 1.0s blinking animation (pausing when unfocused), placeholderLayer, and scroll offset tracking.
+- Platform text-input bridge (`PlatformTextInputAdapter`) and `HostNSView` conformance to `NSTextInputClient` supporting IME composition, clipboard cut/copy/paste, and keyboard navigation without leaking platform UI framework classes.
+- Focus scopes and keyboard submission: `FocusScopeManager`, focus restoration after dismissal, `.focusScope()`, `.onSubmit()`, and `.submitLabel()`.
+- Data validation rules: `ValidationRule` (`.required`, `.email`, `.minLength`, `.maxLength`, `.custom`) and `ValidationResult`.
+- P1 interactive data entry controls in `PrismUI`: `Input`, `Textarea`, `Button` (with variants and sizes), `Checkbox`, `RadioGroup`, `Switch`, `Toggle`, `Field` (with labels and error feedback), and `Form`.
+- Architecture Decision Record `ADR 0014: Core Text Editing Engine and Interactive Form Controls` and text editing & forms developer guide.
