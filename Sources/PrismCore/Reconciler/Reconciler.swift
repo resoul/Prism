@@ -19,6 +19,7 @@ public enum Reconciler {
         case (.group, .group): return true
         case (.empty, .empty): return true
         case (.custom(let a), .custom(let b)): return a == b
+        case (.portal(let a), .portal(let b)): return a == b
         default: return false
         }
     }

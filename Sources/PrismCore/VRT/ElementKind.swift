@@ -43,6 +43,7 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
     case group
     case empty
     case custom(String)
+    case portal(targetLayer: OverlayLayer)
 
     public var description: String {
         switch self {
@@ -68,6 +69,8 @@ public enum ElementKind: Hashable, Sendable, CustomStringConvertible {
             return "Empty"
         case .custom(let name):
             return "Custom(\(name))"
+        case .portal(let targetLayer):
+            return "Portal(targetLayer: \(targetLayer.rawValue))"
         }
     }
 }

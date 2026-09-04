@@ -91,3 +91,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - System accessibility tokens (`reduceMotion`, `increaseContrast`) added to `LocalizationEnvironment`.
 - Centralized `KeyboardShortcutRegistry` with duplicate shortcut conflict detection diagnostics (`ShortcutConflict`).
 - Architecture Decision Record `ADR 0011: Unified Input Events, FocusTree, and Synchronized Accessibility Tree` and events, focus, and accessibility guide.
+- Root `OverlayHost` with named tiers (`content`, `floating`, `modal`, `toast`, `debug`), strict z-ordering (0, 1000, 2000, 3000, 4000), unclipped child containers (`masksToBounds = false`), and modal backdrop layer.
+- `Portal(layer:)` component and `.portal(layer:)` modifier projecting visual CALayers into overlay tiers while retaining logical component parentage, state ownership, environment inheritance, and event bubbling.
+- Geometric anchor preference contract (`.anchor(id:)`, `AnchorRegistry`) supporting popover/tooltip positioning relative to an anchor with automatic invalidation on scroll, resize, and unmount.
+- Automatic anchor unmount handling dismissing associated overlays with `.anchorUnmounted`.
+- Modal lifecycle management: focus transfer on presentation, automatic focus restoration on dismissal, pointer blocking via backdrop, backdrop tap dismissal (`.backdropTap`), and Escape key dismissal (`.escapeKey`).
+- Public `.testID(String)` modifier on `RenderElement` and `Component` with development diagnostics (`TestIDValidator`, `TestIDConflict`) for duplicate test ID detection and automated UI test lookup.
+- Reverse-z overlay hit testing in `HitTester` evaluating tiers in top-down order (`debug` -> `toast` -> `modal` -> `floating` -> `content`) and blocking background pointer events during modal presentation.
+- Architecture Decision Record `ADR 0012: OverlayHost, Portal Projection, and Component Testability` and overlay host & portal guide.
