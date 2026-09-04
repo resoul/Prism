@@ -140,3 +140,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - End-to-end collapsing tab pager component: `CollapsingTabPager` in `PrismUI` with `@TabPageListBuilder` declarative API and `Binding` support.
 - Heavy integration benchmark & demo: `ProfilePageDemo` reproducing `ProfilePage-main` with three independent `PagedStore`s (Posts, Likes, Reposts) rendering 10,000 synthetic items in virtualized `LazyGrid`s with async images, prefetch triggers, in-flight deduplication, and query generation cancellation.
 - Architecture Decision Record `ADR 0017: CollapsingTabPager, Gesture Arena, and Shared Header Coordinator` and collapsing tab pager developer guide.
+- P1 Data Display components in `PrismUI`: `Badge` (with semantic variants `.default`, `.secondary`, `.destructive`, `.outline`), `Label` (icon and text composite with accessibility synthesis), `Avatar` (with async image loading and fallback initials), `Card` (with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, and `CardFooter` subcomponents), and `IconTile` (rounded accent tile with optional badge).
+- P1 Feedback components: `Alert` (semantic variants `.info`, `.warning`, `.success`, `.destructive` with automatic icon pairing) and `Spinner` (Core Animation rotating indicator with automatic `reduceMotion` accessibility adaptation).
+- P1 Navigation component: `Tabs` with two-way selection binding, keyboard navigation (arrow keys), and semantic `tab` / `tabpanel` accessibility linking.
+- P1 Modal Overlay components: `Dialog` (with focus trap, dimmed backdrop layer, and Escape/action dismissal) and `Tooltip` (floating contextual hint in `.floating` tier with placement and delay).
+- P1 Layout primitives: `Divider` (hairline separator with theme-aware border color) and `Frame` (explicit dimension boundaries and alignment constraints).
+- Extensible styling contracts in `PrismUI`: `ButtonStyle`, `InputStyle`, and `CardStyle` protocols with built-in ShadCN-style defaults, decoupling aesthetics from accessibility invariants.
+- Vertical integration screen: `P1DemoScreen` verifying cohesive operation across form validation, tabs, avatars, alerts, dialogs, and tooltips.
+- Architecture Decision Record `ADR 0018: P1 Component Catalog and Extensible Style Contracts` and P1 component catalog developer guide.
