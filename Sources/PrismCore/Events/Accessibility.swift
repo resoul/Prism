@@ -16,6 +16,7 @@ public struct AccessibilityTraits: OptionSet, Sendable, Hashable {
     public static let image         = AccessibilityTraits(rawValue: 1 << 6)
     public static let searchField   = AccessibilityTraits(rawValue: 1 << 7)
     public static let staticText    = AccessibilityTraits(rawValue: 1 << 8)
+    public static let updatesFrequently = AccessibilityTraits(rawValue: 1 << 9)
 }
 
 /// Actions performable on an accessibility element by assistive technologies.
