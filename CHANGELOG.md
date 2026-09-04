@@ -118,3 +118,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Data validation rules: `ValidationRule` (`.required`, `.email`, `.minLength`, `.maxLength`, `.custom`) and `ValidationResult`.
 - P1 interactive data entry controls in `PrismUI`: `Input`, `Textarea`, `Button` (with variants and sizes), `Checkbox`, `RadioGroup`, `Switch`, `Toggle`, `Field` (with labels and error feedback), and `Form`.
 - Architecture Decision Record `ADR 0014: Core Text Editing Engine and Interactive Form Controls` and text editing & forms developer guide.
+- Value-type asynchronous state machine: `Loadable<Value>` with `.idle`, `.loading(previous:)`, `.loaded`, `.refreshing(previous:)`, and `.failure(error:previous:)` preserving stale data during background revalidations and retry states.
+- Typed error classification: `LoadableError` with categorized error codes (`.network`, `.timeout`, `.unauthorized`, `.forbidden`, `.notFound`, `.serverError`, `.decoding`, `.cancelled`) and sanitized debugging details.
+- Generic `PageLoader` and `PageCache` protocols decoupled from concrete networking or database engines.
+- Generic `PagedStore<Item, Query, Cursor>`: actor/serialized state machine with reactive Flux `CurrentValueDistinct` stream, synchronous `currentState` snapshot, automatic in-flight request deduplication, deterministic stable item ID merging, and monotonic query generation tracking.
+- Declarative UI `Resource<Value>` component in `PrismUI`: customizable content, loading, failure, and empty state builders with accessibility traits and zero network ownership.
+- Architecture Decision Record `ADR 0015: Loadable, Resource, and Generic PagedStore` and loadable & paged store developer guide.
