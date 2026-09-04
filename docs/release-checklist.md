@@ -1,5 +1,8 @@
 # 0.x Release Checklist
 
+See [Platform Build Verification](platform-build-verification.md) for the
+strict local and CI build gate.
+
 - [ ] `swift test` and `./scripts/check_build.sh` pass from a clean checkout.
 - [ ] Build iOS, iPadOS, macOS, and tvOS targets; record unavailable environments rather than treating them as passed.
 - [ ] Run `CatalogReleaseTests`, component snapshots, accessibility screen, and fresh-consumer `import PrismUI` compile check.

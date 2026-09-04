@@ -43,7 +43,7 @@ public final class PlatformTextInputAdapter: @unchecked Sendable {
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(selectedText, forType: .string)
-        #elseif canImport(UIKit)
+        #elseif os(iOS) && canImport(UIKit)
         UIPasteboard.general.string = selectedText
         #endif
     }
@@ -61,7 +61,7 @@ public final class PlatformTextInputAdapter: @unchecked Sendable {
         let clipboardText: String? = {
             #if canImport(AppKit) && !targetEnvironment(macCatalyst)
             return NSPasteboard.general.string(forType: .string)
-            #elseif canImport(UIKit)
+            #elseif os(iOS) && canImport(UIKit)
             return UIPasteboard.general.string
             #else
             return nil
