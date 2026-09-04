@@ -208,13 +208,28 @@ public final class HostNSView: NSView, PrismHost {
     public override func keyDown(with event: NSEvent) {
         let characters = event.characters ?? ""
         let charsIgnoring = event.charactersIgnoringModifiers ?? ""
+        let mods = convertModifiers(event.modifierFlags)
+
+        if PlatformTextInputAdapter.shared.activeDocument != nil {
+            let handled = PlatformTextInputAdapter.shared.handleKey(
+                key: characters,
+                keyCode: event.keyCode,
+                modifiers: mods,
+                isRepeat: event.isARepeat
+            )
+            if handled {
+                engine.render()
+                return
+            }
+        }
+
         let handled = engine.dispatchKeyEvent(
             type: .keyDown,
             key: characters,
             characters: characters,
             charactersIgnoringModifiers: charsIgnoring,
             keyCode: event.keyCode,
-            modifiers: convertModifiers(event.modifierFlags),
+            modifiers: mods,
             isRepeat: event.isARepeat
         )
         if handled != .handled {
@@ -244,6 +259,61 @@ public final class HostNSView: NSView, PrismHost {
         if flags.contains(.command) { mods.insert(.command) }
         if flags.contains(.capsLock) { mods.insert(.capsLock) }
         return mods
+    }
+}
+
+extension HostNSView: NSTextInputClient {
+    public func insertText(_ string: Any, replacementRange: NSRange) {
+        let str: String = (string as? String) ?? (string as? NSAttributedString)?.string ?? ""
+        PlatformTextInputAdapter.shared.insertText(str, replacementRange: replacementRange)
+        engine.render()
+    }
+
+    public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
+        let str: String = (string as? String) ?? (string as? NSAttributedString)?.string ?? ""
+        PlatformTextInputAdapter.shared.setMarkedText(str, selectedRange: selectedRange, replacementRange: replacementRange)
+        engine.render()
+    }
+
+    public func unmarkText() {
+        PlatformTextInputAdapter.shared.unmarkText()
+        engine.render()
+    }
+
+    public func selectedRange() -> NSRange {
+        PlatformTextInputAdapter.shared.selectedRange
+    }
+
+    public func markedRange() -> NSRange {
+        PlatformTextInputAdapter.shared.markedRange
+    }
+
+    public func hasMarkedText() -> Bool {
+        PlatformTextInputAdapter.shared.hasMarkedText
+    }
+
+    public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
+        guard let doc = PlatformTextInputAdapter.shared.activeDocument else { return nil }
+        let charRange = doc.charRange(for: range)
+        let sub = doc.substring(for: charRange)
+        actualRange?.pointee = range
+        return NSAttributedString(string: sub)
+    }
+
+    public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
+        []
+    }
+
+    public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
+        var r = NSRect(origin: .zero, size: NSSize(width: 10, height: 20))
+        if let win = window {
+            r = win.convertToScreen(convert(r, to: nil))
+        }
+        return r
+    }
+
+    public func characterIndex(for point: NSPoint) -> Int {
+        0
     }
 }
 #endif

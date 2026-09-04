@@ -2,9 +2,8 @@ import Foundation
 
 /// Two-way value binding connecting controls, inputs, and components to reactive state.
 /// Mutates values strictly on `@MainActor` and provides projection, mapping, and feedback loop prevention.
-@MainActor
 @dynamicMemberLookup
-public struct Binding<Value> {
+public struct Binding<Value>: @unchecked Sendable {
     private let getter: @MainActor () -> Value
     private let setter: @MainActor (Value) -> Void
 
@@ -18,8 +17,24 @@ public struct Binding<Value> {
 
     /// The current bound value.
     public var wrappedValue: Value {
-        get { getter() }
-        nonmutating set { setter(newValue) }
+        get {
+            if Thread.isMainThread {
+                return MainActor.assumeIsolated { getter() }
+            } else {
+                return DispatchQueue.main.sync {
+                    MainActor.assumeIsolated { getter() }
+                }
+            }
+        }
+        nonmutating set {
+            if Thread.isMainThread {
+                MainActor.assumeIsolated { setter(newValue) }
+            } else {
+                DispatchQueue.main.sync {
+                    MainActor.assumeIsolated { setter(newValue) }
+                }
+            }
+        }
     }
 
     /// Creates a read-only constant binding.

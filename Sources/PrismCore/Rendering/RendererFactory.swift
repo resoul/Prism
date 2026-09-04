@@ -13,6 +13,8 @@ public enum RendererFactory {
             return ShapeRenderer(elementID: element.id)
         case .icon:
             return IconRenderer(elementID: element.id)
+        case .textEditor:
+            return TextEditorRenderer(elementID: element.id)
         case .stack, .spacer, .custom, .group, .empty, .portal:
             return ContainerRenderer(elementID: element.id)
         }

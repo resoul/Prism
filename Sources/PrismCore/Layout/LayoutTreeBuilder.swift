@@ -94,6 +94,10 @@ public enum LayoutTreeBuilder {
             }()
             return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: defaultSize)
 
+        case .textEditor(_, let multiline):
+            let defaultH = multiline ? 80.0 : 36.0
+            return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: defaultH)
+
         case .stack, .group, .empty, .custom, .portal:
             return nil
         }
