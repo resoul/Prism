@@ -59,9 +59,8 @@ public struct Theme: Equatable, Sendable {
     }
 
     /// Convenience initializer to resolve a theme from a PrismConfig.
-    public init(config: PrismConfig, themeID: ThemeID? = nil) {
-        let resolved = (try? config.resolveTheme(for: themeID)) ?? Theme.fallbackDefault(id: themeID ?? .light)
-        self = resolved
+    public init(config: PrismConfig, themeID: ThemeID? = nil) throws {
+        self = try config.resolveTheme(for: themeID)
     }
 
     /// Default baseline theme used as safety fallback.

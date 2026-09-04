@@ -192,7 +192,7 @@ public struct PrismConfig: Equatable, Sendable {
         self.resolvedThemes = try PrismConfig.resolve(baseTokens: baseTokens, definitions: definitions)
     }
 
-    public init(@PrismConfigBuilder _ items: () -> [PrismConfigItem]) {
+    public init(@PrismConfigBuilder _ items: () -> [PrismConfigItem]) throws {
         var base = BaseTokens()
         var defs: [ThemeDefinition] = []
 
@@ -207,8 +207,7 @@ public struct PrismConfig: Equatable, Sendable {
 
         self.baseTokens = base
         self.definitions = defs
-        let resolved = (try? PrismConfig.resolve(baseTokens: base, definitions: defs)) ?? [:]
-        self.resolvedThemes = resolved
+        self.resolvedThemes = try PrismConfig.resolve(baseTokens: base, definitions: defs)
     }
 
     /// Validates the configuration and throws detailed diagnostic errors.

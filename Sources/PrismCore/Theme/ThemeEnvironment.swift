@@ -26,7 +26,10 @@ public struct ThemeEnvironment: Equatable, Sendable {
     }
 
     /// Resolves the active Theme following the documented three-tier priority hierarchy.
-    public var resolvedTheme: Theme {
+    ///
+    /// Throws when the selected or overridden theme is not declared in `config`.
+    /// This keeps invalid configuration from silently reaching a rendering pass.
+    public func resolvedTheme() throws -> Theme {
         let targetID: ThemeID
 
         if let overrideID = subtreeOverride {
@@ -43,7 +46,7 @@ public struct ThemeEnvironment: Equatable, Sendable {
             }
         }
 
-        return (try? config.resolveTheme(for: targetID)) ?? Theme.fallbackDefault(id: targetID)
+        return try config.resolveTheme(for: targetID)
     }
 
     /// Produces an environment fork with a localized subtree theme override.

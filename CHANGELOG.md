@@ -20,4 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Theme resolution and multi-level inheritance supporting `ThemeID` (`.light`, `.dark`, `.midnight`, `.brand(...)`) with complete token resolution.
 - Three-tier theme priority resolution separating `ColorScheme` and `ThemeSelection` with subtree overrides.
 - Typography engine: `FontRole`, `FontWeight`, `TypeScale`, `TextStyle`, `FontResolver` with thread-safe `CTFont` caching and system fallbacks, and `FontLoader` for bundle and URL registration.
-- Architecture Decision Record `ADR 0002: Immutable Design Tokens and Pre-Render Theme Resolution`.
+- Architecture Decision Record `ADR 0003: Immutable Design Tokens and Pre-Render Theme Resolution`.
+- Fail-fast theme construction and environment resolution: invalid configurations and unknown selected themes now throw typed `ConfigValidationError`s instead of silently substituting a fallback theme.
+- `FontResolver` now exposes an optional `FontResolutionDiagnostic` callback when it uses a system-font fallback.

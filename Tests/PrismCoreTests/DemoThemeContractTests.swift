@@ -4,7 +4,7 @@ import XCTest
 final class DemoThemeContractTests: XCTestCase {
 
     func testAuthoringContractExample() throws {
-        let appConfig = PrismConfig {
+        let appConfig = try PrismConfig {
             BaseTokens {
                 Typography(
                     body: .init(family: "Inter", weight: .regular),
@@ -53,7 +53,7 @@ final class DemoThemeContractTests: XCTestCase {
             }
         }
 
-        let appTheme = Theme(config: appConfig)
+        let appTheme = try Theme(config: appConfig)
         XCTAssertEqual(appTheme.id, ThemeID.light)
         XCTAssertEqual(appTheme.spacing.base, 4)
         XCTAssertEqual(appTheme.radius.full, 9_999)

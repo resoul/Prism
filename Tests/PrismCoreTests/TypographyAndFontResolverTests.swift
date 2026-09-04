@@ -2,6 +2,23 @@ import XCTest
 @testable import PrismCore
 import CoreText
 
+private final class DiagnosticRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var values: [FontResolutionDiagnostic] = []
+
+    func append(_ diagnostic: FontResolutionDiagnostic) {
+        lock.lock()
+        values.append(diagnostic)
+        lock.unlock()
+    }
+
+    var recorded: [FontResolutionDiagnostic] {
+        lock.lock()
+        defer { lock.unlock() }
+        return values
+    }
+}
+
 final class TypographyAndFontResolverTests: XCTestCase {
 
     func testTypeScaleCalculations() {
@@ -68,11 +85,23 @@ final class TypographyAndFontResolverTests: XCTestCase {
     }
 
     func testResolverSystemFallbackForMissingFamily() {
-        let resolver = FontResolver()
+        let diagnostics = DiagnosticRecorder()
+        let resolver = FontResolver { diagnostic in
+            diagnostics.append(diagnostic)
+        }
         // Non-existent family name
         let fallbackFont = resolver.resolve(family: "DefinitelyNonExistentFontFamily12345", weight: .semibold, size: 18)
 
         XCTAssertNotNil(fallbackFont)
         XCTAssertEqual(CTFontGetSize(fallbackFont), 18.0)
+        XCTAssertEqual(
+            diagnostics.recorded,
+            [.usedSystemFallback(
+                requestedFamily: "DefinitelyNonExistentFontFamily12345",
+                weight: .semibold,
+                size: 18,
+                italic: false
+            )]
+        )
     }
 }

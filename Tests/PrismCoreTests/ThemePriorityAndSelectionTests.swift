@@ -5,9 +5,9 @@ final class ThemePriorityAndSelectionTests: XCTestCase {
 
     var sampleConfig: PrismConfig!
 
-    override func setUp() {
-        super.setUp()
-        sampleConfig = PrismConfig {
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        sampleConfig = try PrismConfig {
             Theme(.light) {
                 Colors(background: .hex("#FFFFFF"), primary: .hex("#111111"))
             }
@@ -30,13 +30,13 @@ final class ThemePriorityAndSelectionTests: XCTestCase {
             systemMapping: mapping,
             currentSystemScheme: .light
         )
-        XCTAssertEqual(env.resolvedTheme.id, .light)
-        XCTAssertEqual(env.resolvedTheme.colors.background, Color.hex("#FFFFFF"))
+        XCTAssertEqual(try env.resolvedTheme().id, .light)
+        XCTAssertEqual(try env.resolvedTheme().colors.background, Color.hex("#FFFFFF"))
 
         // When system is dark, system mapping resolves to .midnight
         env = env.withSystemScheme(.dark)
-        XCTAssertEqual(env.resolvedTheme.id, .midnight)
-        XCTAssertEqual(env.resolvedTheme.colors.background, Color.hex("#020617"))
+        XCTAssertEqual(try env.resolvedTheme().id, .midnight)
+        XCTAssertEqual(try env.resolvedTheme().colors.background, Color.hex("#020617"))
     }
 
     func testPriorityExplicitSelectionOverridesSystem() {
@@ -49,8 +49,8 @@ final class ThemePriorityAndSelectionTests: XCTestCase {
             currentSystemScheme: .light // System is light, but user explicitly chose dark
         )
 
-        XCTAssertEqual(env.resolvedTheme.id, .dark)
-        XCTAssertEqual(env.resolvedTheme.colors.background, Color.hex("#1E1E1E"))
+        XCTAssertEqual(try env.resolvedTheme().id, .dark)
+        XCTAssertEqual(try env.resolvedTheme().colors.background, Color.hex("#1E1E1E"))
     }
 
     func testPrioritySubtreeOverrideBeatsAll() {
@@ -65,8 +65,8 @@ final class ThemePriorityAndSelectionTests: XCTestCase {
         )
 
         let subtreeEnv = baseEnv.withSubtreeOverride(.midnight)
-        XCTAssertEqual(subtreeEnv.resolvedTheme.id, .midnight)
-        XCTAssertEqual(subtreeEnv.resolvedTheme.colors.background, Color.hex("#020617"))
+        XCTAssertEqual(try subtreeEnv.resolvedTheme().id, .midnight)
+        XCTAssertEqual(try subtreeEnv.resolvedTheme().colors.background, Color.hex("#020617"))
     }
 
     func testSubstituteThemeInTestWithoutPlatformHost() {
@@ -91,5 +91,16 @@ final class ThemePriorityAndSelectionTests: XCTestCase {
 
         XCTAssertEqual(testTheme.id, "test-theme")
         XCTAssertEqual(testTheme.colors.background.red, 0.1, accuracy: 0.01)
+    }
+
+    func testUnknownSelectionFailsInsteadOfSilentlyUsingFallbackTheme() {
+        let environment = ThemeEnvironment(
+            config: sampleConfig,
+            selection: .explicit("not-declared")
+        )
+
+        XCTAssertThrowsError(try environment.resolvedTheme()) { error in
+            XCTAssertEqual(error as? ConfigValidationError, .missingRequiredTheme("not-declared"))
+        }
     }
 }

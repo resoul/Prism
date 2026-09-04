@@ -25,14 +25,33 @@ public struct FontCacheKey: Hashable, Sendable {
     }
 }
 
+/// A non-fatal event emitted when custom typography cannot be resolved exactly.
+///
+/// PrismCore deliberately exposes this as a callback rather than importing PrismLogging,
+/// preserving the package dependency direction. Applications may bridge it to their
+/// preferred logging system.
+public enum FontResolutionDiagnostic: Equatable, Sendable {
+    case usedSystemFallback(
+        requestedFamily: String,
+        weight: FontWeight,
+        size: CGFloat,
+        italic: Bool
+    )
+}
+
 /// Thread-safe resolver producing CTFont instances with full-key caching and system font fallbacks.
 public final class FontResolver: @unchecked Sendable {
     public static let shared = FontResolver()
 
     private let lock = NSLock()
     private var cache: [FontCacheKey: CTFont] = [:]
+    private let diagnosticHandler: (@Sendable (FontResolutionDiagnostic) -> Void)?
 
-    public init() {}
+    public init(
+        diagnosticHandler: (@Sendable (FontResolutionDiagnostic) -> Void)? = nil
+    ) {
+        self.diagnosticHandler = diagnosticHandler
+    }
 
     /// Resolves a CTFont for the given style and role within a typography configuration.
     public func resolve(
@@ -111,6 +130,14 @@ public final class FontResolver: @unchecked Sendable {
         // or if family name doesn't match and isn't available, construct native system font with weight trait.
         let resolvedFamily = CTFontCopyFamilyName(customFont) as String
         if !resolvedFamily.localizedCaseInsensitiveContains(family) && !isFamilyInstalled(family) {
+            diagnosticHandler?(
+                .usedSystemFallback(
+                    requestedFamily: family,
+                    weight: weight,
+                    size: size,
+                    italic: italic
+                )
+            )
             return createSystemFontFallback(weight: weight, size: size, italic: italic)
         }
 

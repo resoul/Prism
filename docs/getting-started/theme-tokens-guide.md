@@ -11,7 +11,7 @@ Themes and base tokens are authored using result builders without global mutable
 ```swift
 import Prism
 
-let appConfig = PrismConfig {
+let appConfig = try PrismConfig {
     // Base tokens inherited by all named themes
     BaseTokens {
         Typography(
@@ -65,7 +65,7 @@ let appConfig = PrismConfig {
 }
 
 // Resolves the primary/default theme
-let appTheme = Theme(config: appConfig)
+let appTheme = try Theme(config: appConfig)
 ```
 
 ---
@@ -74,7 +74,7 @@ let appTheme = Theme(config: appConfig)
 
 - Every child theme inherits all tokens (colors, typography, spacing, radius, shadow, motion) from its parent theme.
 - After resolution, **every theme is 100% complete**. UI components never perform missing-token fallbacks during rendering.
-- `PrismConfig.validate()` runs before rendering, catching:
+- `PrismConfig` construction validates before rendering and throws typed errors. `PrismConfig.validate()` remains available when validating an already-created configuration. Both catch:
   - Duplicate theme IDs (`ConfigValidationError.duplicateThemeID`)
   - Missing parent themes (`ConfigValidationError.missingParentTheme`)
   - Inheritance cycles (e.g. A -> B -> A) (`ConfigValidationError.inheritanceCycle`)
@@ -104,4 +104,5 @@ let ctFont = theme.font(for: .heading2, role: .heading)
 
 - **Thread Safety:** `FontResolver.shared` caches `CTFont` instances by `(family, weight, size, italic, tracking)` using a thread-safe lock.
 - **System Fallback:** If a custom font family is not installed or available on the host system, `FontResolver` automatically degrades to the platform system UI font while preserving the requested weight and size.
+- **Fallback Diagnostics:** Provide `FontResolver(diagnosticHandler:)` to send `FontResolutionDiagnostic.usedSystemFallback` to your app's logging bridge without adding a `PrismCore` → `PrismLogging` dependency.
 - **Dynamic Registration:** Custom font assets can be registered dynamically at runtime from bundles or URLs via `FontLoader.register(fromURL:)`.

@@ -4,24 +4,20 @@ import XCTest
 final class ThemeGraphValidationTests: XCTestCase {
 
     func testDuplicateThemeID() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             Theme(.light) { Colors(background: .hex("#FFFFFF")) }
             Theme(.light) { Colors(background: .hex("#000000")) }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             XCTAssertEqual(error as? ConfigValidationError, .duplicateThemeID(.light))
         }
     }
 
     func testMissingParentTheme() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             Theme(.dark, extending: .light) {
                 Colors(background: .hex("#000000"))
             }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             XCTAssertEqual(
                 error as? ConfigValidationError,
                 .missingParentTheme(child: .dark, parent: .light)
@@ -30,12 +26,10 @@ final class ThemeGraphValidationTests: XCTestCase {
     }
 
     func testInheritanceCycleDirect() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             Theme("A", extending: "B") { Colors() }
             Theme("B", extending: "A") { Colors() }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             guard case .inheritanceCycle = error as? ConfigValidationError else {
                 XCTFail("Expected inheritanceCycle error, got \(error)")
                 return
@@ -44,13 +38,11 @@ final class ThemeGraphValidationTests: XCTestCase {
     }
 
     func testInheritanceCycleIndirect() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             Theme("A", extending: "C") { Colors() }
             Theme("B", extending: "A") { Colors() }
             Theme("C", extending: "B") { Colors() }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             guard case .inheritanceCycle = error as? ConfigValidationError else {
                 XCTFail("Expected inheritanceCycle error, got \(error)")
                 return
@@ -59,52 +51,44 @@ final class ThemeGraphValidationTests: XCTestCase {
     }
 
     func testNegativeSpacing() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             BaseTokens {
                 Spacing(base: -4)
             }
             Theme(.light) { Colors() }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             XCTAssertEqual(error as? ConfigValidationError, .negativeSpacing(-4))
         }
     }
 
     func testNegativeRadius() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             BaseTokens {
                 Radius(sm: -2)
             }
             Theme(.light) { Colors() }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             XCTAssertEqual(error as? ConfigValidationError, .negativeRadius(-2))
         }
     }
 
     func testEmptyFontFamily() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             BaseTokens {
                 Typography(body: FontConfig(family: "   ", weight: .regular))
             }
             Theme(.light) { Colors() }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             XCTAssertEqual(error as? ConfigValidationError, .emptyFontFamily(.body))
         }
     }
 
     func testInvalidHexColorInTheme() {
-        let config = PrismConfig {
+        XCTAssertThrowsError(try PrismConfig {
             Theme(.light) {
                 Colors(background: .hex("not-a-color"))
             }
-        }
-
-        XCTAssertThrowsError(try config.validate()) { error in
+        }) { error in
             XCTAssertEqual(error as? ConfigValidationError, .invalidHexColor("not-a-color"))
         }
     }
