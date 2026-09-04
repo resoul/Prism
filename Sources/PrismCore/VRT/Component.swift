@@ -180,4 +180,12 @@ extension Component {
     public func clipped(_ isClipped: Bool = true) -> RenderElement {
         render().clipped(isClipped)
     }
+
+    public func transition(_ transition: Transition) -> RenderElement {
+        render().transition(transition)
+    }
+
+    public func animation(_ animation: Animation?) -> RenderElement {
+        render().animation(animation)
+    }
 }

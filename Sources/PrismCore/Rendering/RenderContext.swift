@@ -7,17 +7,20 @@ public struct RenderContext: Sendable {
     public var theme: Theme?
     public var colorScheme: ColorScheme
     public var disableActions: Bool
+    public var reduceMotion: Bool
 
     public init(
         scaleFactor: Double = 2.0,
         theme: Theme? = nil,
         colorScheme: ColorScheme = .light,
-        disableActions: Bool = true
+        disableActions: Bool = true,
+        reduceMotion: Bool = false
     ) {
         self.scaleFactor = max(1.0, scaleFactor)
         self.theme = theme
         self.colorScheme = colorScheme
         self.disableActions = disableActions
+        self.reduceMotion = reduceMotion
     }
 
     public static let `default` = RenderContext()

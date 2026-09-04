@@ -148,3 +148,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extensible styling contracts in `PrismUI`: `ButtonStyle`, `InputStyle`, and `CardStyle` protocols with built-in ShadCN-style defaults, decoupling aesthetics from accessibility invariants.
 - Vertical integration screen: `P1DemoScreen` verifying cohesive operation across form validation, tabs, avatars, alerts, dialogs, and tooltips.
 - Architecture Decision Record `ADR 0018: P1 Component Catalog and Extensible Style Contracts` and P1 component catalog developer guide.
+- Declarative animation primitives in `PrismCore`: `Animation` supporting timing curves (`.linear`, `.easeIn`, `.easeOut`, `.easeInOut`, `.timingCurve`), physically-based springs (`.spring`, `.bouncy`, `.snappy`, `.smooth`, `.interpolatingSpring`), and chainable modifiers (`.delay`, `.speed`, `.repeatCount`, `.repeatForever`).
+- Ambient transaction scoping: `Transaction` and `withAnimation` with nested transaction inheritance and suppression under `disablesAnimations: true`.
+- Zero model drift Core Animation layer bridge: `LayerAnimationBridge` immediately synchronizing layer model properties under actions-disabled `CATransaction` and attaching explicit `CAAnimation` objects sampled from the current presentation layer, eliminating jump-back glitches upon completion or interruption.
+- Structural transitions in `PrismCore` and `PrismUI`: `Transition` supporting `.identity`, `.opacity`, `.scale`, `.slide`, `.move`, `.offset`, `.combined`, and `.asymmetric` transitions.
+- Reconciler deferred removal retention and resurrection: `Reconciler` holds nodes undergoing exit transitions mounted in `parent.animatingOutChildren` until completion, and cleanly cancels exit animations and resurrects nodes if re-inserted mid-transition.
+- Universal `Reduce Motion` accessibility support: `ReduceMotionPreference` automatically collapses animation durations to zero and converts physical spatial transitions to gentle crossfades without component boilerplate.
+- Keyframe animation API: `KeyframeTrack` and `KeyframeAnimationToken` supporting bounded or repeating playback with cancellation on unmount.
+- Telemetry and diagnostics: `AnimationInspector` and `AnimationInspectorTelemetry` displaying active transaction IDs, running animation counts, and transition lifecycle logs.
+- Architecture Decision Record `ADR 0019: Declarative Animation and Transition Lifecycle` and animation & transitions developer guide.
