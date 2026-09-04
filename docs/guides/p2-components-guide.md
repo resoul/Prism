@@ -207,3 +207,26 @@ Accordion(
     expandedIDs: $expandedSectionIDs
 )
 ```
+
+---
+
+## 10. P2 data entry
+
+P2 entry controls use the existing `Binding` / `TextDocument` / focus path; they do not create a second input engine. `NumberField`, `Slider`, `RangeSlider`, and `Stepper` clamp values to their declared range and round updates to `step`. Their hosts expose increment/decrement actions for keyboard and assistive technology.
+
+```swift
+NumberField("Quantity", value: quantity, range: 0...10, step: 1)
+Slider(value: opacity, in: 0...1, step: 0.05, label: "Opacity")
+ToggleGroup(options: densityOptions, selected: density, mode: .single)
+```
+
+`Select` is Prism's platform-neutral menu presentation; `NativeSelect` requests a native host presentation through an internal adapter. Neither public API exposes UIKit, AppKit, or SwiftUI types. Searchable and multi-select menus are P3 work, not hidden options in this API.
+
+```swift
+Select("Plan", selection: plan, options: [
+    SelectionOption("free", label: "Free"),
+    SelectionOption("pro", label: "Pro")
+])
+```
+
+Use `InputGroup` for leading/trailing adornments around one `Input`, and `ButtonGroup` for related actions. `P2DataEntryDemoScreen` provides an isolated catalog fixture including controlled values, compact grouping, validation-capable numeric bounds, and focusable controls.

@@ -1,5 +1,11 @@
 # Prism — Known Limitations
 
+## Phase 05 / Task 19
+
+- `Select` currently models a single, non-searchable selection. Searchable menus and general multi-select popovers are planned P3 work.
+- `NativeSelect` is a semantic host-adapter request; a platform host may fall back to the standard Prism menu until its native adapter is available.
+- Range, step, keyboard, and accessibility semantics are covered at the render-tree level. End-to-end pointer drag and native undo/redo verification require iOS/macOS host UI test environments.
+
 ## Phase 01 / Task 01 Status
 
 The following limitations are known and expected during the package foundation phase:
