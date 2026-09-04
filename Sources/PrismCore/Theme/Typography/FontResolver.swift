@@ -53,15 +53,21 @@ public final class FontResolver: @unchecked Sendable {
         self.diagnosticHandler = diagnosticHandler
     }
 
-    /// Resolves a CTFont for the given style and role within a typography configuration.
+    /// Resolves a CTFont for the given style and role within a typography configuration, supporting Dynamic Type scaling.
     public func resolve(
         style: TextStyle,
         role: FontRole,
         in typography: Typography,
+        contentSizeCategory: ContentSizeCategory = .large,
+        dynamicTypeConfig: DynamicTypeConfig? = nil,
         italic: Bool = false
     ) -> CTFont {
         let config = typography.fontConfig(for: role)
-        let size = typography.fontSize(for: style)
+        let size = typography.fontSize(
+            for: style,
+            contentSizeCategory: contentSizeCategory,
+            dynamicTypeConfig: dynamicTypeConfig
+        )
         return resolve(
             family: config.family,
             weight: config.weight,

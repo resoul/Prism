@@ -23,3 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture Decision Record `ADR 0003: Immutable Design Tokens and Pre-Render Theme Resolution`.
 - Fail-fast theme construction and environment resolution: invalid configurations and unknown selected themes now throw typed `ConfigValidationError`s instead of silently substituting a fallback theme.
 - `FontResolver` now exposes an optional `FontResolutionDiagnostic` callback when it uses a system-font fallback.
+- Localization and adaptive text engine (`Locale`, `LayoutDirection`, `ContentSizeCategory`, `LocalizationEnvironment`).
+- `LocalizedStringKey` with parameter interpolation and `LocalizationBundle` supporting in-memory tables, plural cardinality rules, development missing-key markers, and pseudo-localization.
+- Typography scaling with Dynamic Type multiplier and `DynamicTypeConfig` min/max clamping.
+- Direction-aware layout semantics: `DirectionalEdgeInsets` (`leading`/`trailing`) and `HorizontalAlignment` with automatic physical coordinate resolution.
+- Thread-safe zero-allocation formatter cache: `LocaleFormatterCache` for date, number, and currency formatters.
+- Architecture Decision Record `ADR 0003: Unified Localization, Dynamic Type and Directional Layout`.

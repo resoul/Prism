@@ -22,3 +22,7 @@ The following limitations are known and expected during the package foundation p
 5. **Theme & Typography:**
    - Custom font families must be registered via `FontLoader.register` prior to resolving CTFont instances. Unregistered families gracefully fall back to the system UI font with matching weights and traits.
    - Theme configuration is immutable after resolution. Dynamic token mutation requires instantiating an updated `PrismConfig` or providing a local subtree theme override.
+
+6. **Localization & RTL:**
+   - Supported string file formats: standard `Localizable.strings`, `Localizable.stringsdict`, and registered in-memory tables. Advanced `.xcstrings` catalog resolution delegates to the host app bundle.
+   - RTL mirroring is applied to directional layouts (`leading`/`trailing`). Non-directional absolute offsets (`left`/`right`) remain fixed in physical space.
