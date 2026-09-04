@@ -6,6 +6,11 @@ import QuartzCore
 public enum RendererFactory {
     /// Creates and returns a concrete `LayerRenderer` implementation matching the element's kind.
     public static func create(for element: RenderElement) -> LayerRenderer {
+        let style = element.resolvedStyle
+        if element.children.isEmpty && (style.sdfRoundedRect != nil || style.glassmorphism != nil || style.meshGradient != nil) {
+            return MetalEffectRenderer(elementID: element.id)
+        }
+
         switch element.kind {
         case .text:
             return TextRenderer(elementID: element.id)

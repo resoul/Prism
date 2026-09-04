@@ -17,6 +17,9 @@ public enum ElementModifier: Equatable, Sendable, CustomStringConvertible {
     case testID(String)
     case transition(Transition)
     case animation(Animation?)
+    case sdfRoundedRect(cornerRadius: Double, borderWidth: Double = 0, borderColor: Color = .clear, fill: Color? = nil)
+    case glassmorphism(blurRadius: Double = 20, tint: Color = Color(red: 1, green: 1, blue: 1, alpha: 0.2), saturation: Double = 1.2)
+    case meshGradient(MeshGradientGrid)
 
     public var description: String {
         switch self {
@@ -37,9 +40,44 @@ public enum ElementModifier: Equatable, Sendable, CustomStringConvertible {
         case .testID(let id): return "testID(\"\(id)\")"
         case .transition(let t): return "transition(\(t))"
         case .animation(let a): return "animation(\(String(describing: a)))"
+        case .sdfRoundedRect(let r, let bw, let bc, let f):
+            return "sdfRoundedRect(r: \(r), bw: \(bw), bc: \(bc), fill: \(String(describing: f)))"
+        case .glassmorphism(let br, let t, let s):
+            return "glassmorphism(r: \(br), tint: \(t), sat: \(s))"
+        case .meshGradient(let grid):
+            return "meshGradient(\(grid.width)x\(grid.height))"
         }
     }
 }
+
+/// Resolved parameters for Signed Distance Field rounded rect rendering.
+public struct SDFRoundedRectStyle: Equatable, Sendable {
+    public var cornerRadius: Double
+    public var borderWidth: Double
+    public var borderColor: Color
+    public var fill: Color?
+
+    public init(cornerRadius: Double, borderWidth: Double = 0, borderColor: Color = .clear, fill: Color? = nil) {
+        self.cornerRadius = cornerRadius
+        self.borderWidth = borderWidth
+        self.borderColor = borderColor
+        self.fill = fill
+    }
+}
+
+/// Resolved parameters for glassmorphism / frosted blur rendering.
+public struct GlassmorphismStyle: Equatable, Sendable {
+    public var blurRadius: Double
+    public var tint: Color
+    public var saturation: Double
+
+    public init(blurRadius: Double = 20, tint: Color = Color(red: 1, green: 1, blue: 1, alpha: 0.2), saturation: Double = 1.2) {
+        self.blurRadius = blurRadius
+        self.tint = tint
+        self.saturation = saturation
+    }
+}
+
 
 /// Resolved layout and visual style folded from an array of ElementModifiers.
 public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
@@ -54,6 +92,9 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
     public var background: Color?
     public var opacity: Double
     public var zIndex: Int
+    public var sdfRoundedRect: SDFRoundedRectStyle?
+    public var glassmorphism: GlassmorphismStyle?
+    public var meshGradient: MeshGradientGrid?
 
     public init(
         width: Double? = nil,
@@ -66,7 +107,10 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
         margin: DirectionalEdgeInsets = .zero,
         background: Color? = nil,
         opacity: Double = 1.0,
-        zIndex: Int = 0
+        zIndex: Int = 0,
+        sdfRoundedRect: SDFRoundedRectStyle? = nil,
+        glassmorphism: GlassmorphismStyle? = nil,
+        meshGradient: MeshGradientGrid? = nil
     ) {
         self.width = width
         self.height = height
@@ -79,6 +123,9 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
         self.background = background
         self.opacity = opacity
         self.zIndex = zIndex
+        self.sdfRoundedRect = sdfRoundedRect
+        self.glassmorphism = glassmorphism
+        self.meshGradient = meshGradient
     }
 
     /// Resolves an array of modifiers using deterministic precedence rules:
@@ -88,6 +135,7 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
     /// - Opacity: multiplicative (outer * inner, clamped to [0.0, 1.0]).
     /// - Background: later overrides earlier.
     /// - zIndex: later overrides earlier.
+    /// - Effects: later overrides earlier.
     public static func resolve(from modifiers: [ElementModifier]) -> ResolvedStyle {
         var style = ResolvedStyle()
 
@@ -125,6 +173,12 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
                 style.opacity = max(0.0, min(1.0, style.opacity * o))
             case .zIndex(let z):
                 style.zIndex = z
+            case .sdfRoundedRect(let r, let bw, let bc, let f):
+                style.sdfRoundedRect = SDFRoundedRectStyle(cornerRadius: r, borderWidth: bw, borderColor: bc, fill: f)
+            case .glassmorphism(let br, let t, let s):
+                style.glassmorphism = GlassmorphismStyle(blurRadius: br, tint: t, saturation: s)
+            case .meshGradient(let grid):
+                style.meshGradient = grid
             case .explicitKey, .testID, .transition, .animation:
                 break
             }
@@ -142,6 +196,9 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
         if let background { parts.append("background: \(background)") }
         if opacity < 1.0 { parts.append("opacity: \(opacity)") }
         if zIndex != 0 { parts.append("zIndex: \(zIndex)") }
+        if let sdf = sdfRoundedRect { parts.append("sdfRoundedRect(r: \(sdf.cornerRadius))") }
+        if let glass = glassmorphism { parts.append("glass(r: \(glass.blurRadius))") }
+        if let mesh = meshGradient { parts.append("meshGradient(\(mesh.width)x\(mesh.height))") }
         return parts.joined(separator: ", ")
     }
 }

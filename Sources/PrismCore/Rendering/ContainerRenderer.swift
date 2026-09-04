@@ -9,6 +9,7 @@ public final class ContainerRenderer: LayerRenderer {
 
     public private(set) var childRenderers: [ElementID: LayerRenderer] = [:]
     public private(set) var orderedChildIDs: [ElementID] = []
+    private var backgroundEffectRenderer: MetalEffectRenderer?
 
     public init(elementID: ElementID) {
         self.elementID = elementID
@@ -27,16 +28,30 @@ public final class ContainerRenderer: LayerRenderer {
 
             let style = element.resolvedStyle
 
-            if let bg = style.background {
-                rootLayer.backgroundColor = bg.cgColor
-            } else {
+            if style.sdfRoundedRect != nil || style.glassmorphism != nil || style.meshGradient != nil {
+                let effectRenderer = backgroundEffectRenderer ?? MetalEffectRenderer(elementID: element.id)
+                if backgroundEffectRenderer == nil {
+                    backgroundEffectRenderer = effectRenderer
+                    rootLayer.insertSublayer(effectRenderer.rootLayer, at: 0)
+                }
+                effectRenderer.update(element: element, frame: LayoutFrame(origin: .zero, size: frame.size), context: context)
                 rootLayer.backgroundColor = nil
+            } else {
+                backgroundEffectRenderer?.destroy()
+                backgroundEffectRenderer = nil
+
+                if let bg = style.background {
+                    rootLayer.backgroundColor = bg.cgColor
+                } else {
+                    rootLayer.backgroundColor = nil
+                }
             }
 
             rootLayer.opacity = Float(style.opacity)
             rootLayer.zPosition = CGFloat(style.zIndex)
         }
     }
+
 
     /// Synchronizes child renderers with child VRT elements and layout frames.
     /// Invariant: Idempotent re-renders reuse existing renderers and avoid duplicate layers.
@@ -82,6 +97,8 @@ public final class ContainerRenderer: LayerRenderer {
     }
 
     public func destroy() {
+        backgroundEffectRenderer?.destroy()
+        backgroundEffectRenderer = nil
         for renderer in childRenderers.values {
             renderer.destroy()
         }

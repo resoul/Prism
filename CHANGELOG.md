@@ -174,3 +174,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Decoupled navigation state restoration in umbrella `Prism`: `PrismStorageNavigationStore` bridging `NavigationState` to `PrismStorage.Preferences` without violating `MODULE_CONTRACT.md` dependencies.
 - Interactive cross-platform demo flow: `NavigationDemoFlow.swift` with deep-linked profile, responsive mobile/desktop scaffold switching, and multi-window management.
 - Architecture Decision Record `ADR 0021: Navigation, Responsive Layout, and macOS Window Integration` and navigation & responsive layout developer guide.
+- Optional GPU-accelerated Metal backend in `PrismCore`: `MetalDeviceContext` with device discovery, async pipeline compilation, and GPU frame budget tracking (`MetalFrameBudget`).
+- Embedded Metal Shading Language (MSL) shaders: anti-aliased Signed Distance Field (SDF) rounded rectangles, frosted glassmorphism with blur, saturation boost, and specular tint, and multi-point 2D mesh gradients.
+- `CAMetalLayer` lifecycle and compositing: `MetalLayer` managing Retina scale factors, sRGB color spaces, dynamic resize policies, and unmount resource purging (`purgeResources`).
+- Graceful CALayer fallback path: `MetalEffectRenderer` seamlessly falling back to standard `CALayer` corner radii, borders, semi-transparent frosted tints, and `CAGradientLayer`s on non-Metal environments or simulated failures.
+- Declarative public API in `PrismUI`: `MeshGradient` component and `.sdfRoundedRect(...)`, `.glassmorphism(...)`, and `.meshGradient(...)` modifiers extending `Component` and `RenderElement` without leaking Metal types.
+- Isolated demonstration scene: `MetalEffectsDemo` showcasing SDF cards, frosted glassmorphism, multi-color mesh gradient, and live fallback simulation.
+- Architecture Decision Record `ADR 0022: Optional Metal Renderer and Visual Effects` and Metal effects and shaders developer guide.
