@@ -18,3 +18,7 @@ The following limitations are known and expected during the package foundation p
 4. **Observability:**
    - `PrismLogging` provides local Console, OSLog and opt-in file diagnostics only. Crash reporting, analytics and remote support-log upload are intentionally not implemented.
    - File logging is best-effort and may drop records under sustained sink pressure to protect UI responsiveness.
+
+5. **Theme & Typography:**
+   - Custom font families must be registered via `FontLoader.register` prior to resolving CTFont instances. Unregistered families gracefully fall back to the system UI font with matching weights and traits.
+   - Theme configuration is immutable after resolution. Dynamic token mutation requires instantiating an updated `PrismConfig` or providing a local subtree theme override.
