@@ -14,6 +14,7 @@ Packages/
 *.xcworkspace
 DerivedData/
 
-# OS artifacts
+# OS & IDE artifacts
 .DS_Store
+.idea/
 Package.resolved

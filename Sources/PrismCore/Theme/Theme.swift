@@ -49,13 +49,22 @@ public struct Theme: Equatable, Sendable {
         self.definition = ThemeDefinition(id: id, parentID: parentID, colors: colors())
     }
 
-    /// Resolves a CTFont instance using this theme's typography configuration.
+    /// Resolves a CTFont instance using this theme's typography configuration with optional Dynamic Type scaling.
     public func font(
         for style: TextStyle,
         role: FontRole = .body,
+        contentSizeCategory: ContentSizeCategory = .large,
+        dynamicTypeConfig: DynamicTypeConfig? = nil,
         italic: Bool = false
     ) -> CTFont {
-        FontResolver.shared.resolve(style: style, role: role, in: typography, italic: italic)
+        FontResolver.shared.resolve(
+            style: style,
+            role: role,
+            in: typography,
+            contentSizeCategory: contentSizeCategory,
+            dynamicTypeConfig: dynamicTypeConfig,
+            italic: italic
+        )
     }
 
     /// Convenience initializer to resolve a theme from a PrismConfig.

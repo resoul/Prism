@@ -189,6 +189,39 @@ public struct Typography: Equatable, Sendable {
         }
     }
 
+    /// Calculates font size in points for a given style with Dynamic Type scaling and clamp.
+    public func fontSize(
+        for style: TextStyle,
+        contentSizeCategory: ContentSizeCategory = .large,
+        dynamicTypeConfig: DynamicTypeConfig? = nil
+    ) -> CGFloat {
+        let base = fontSize(for: style)
+        if contentSizeCategory == .large {
+            return base
+        }
+        let config = dynamicTypeConfig ?? (contentSizeCategory.isAccessibilityCategory ? .accessibility : .standard)
+        let clampedScale = config.clamp(contentSizeCategory.scaleFactor)
+        let scaledSize = base * clampedScale
+        return (scaledSize * 2).rounded() / 2
+    }
+
+    /// Calculates scaled line-height for a style and role under Dynamic Type.
+    public func scaledLineHeight(
+        for style: TextStyle,
+        role: FontRole = .body,
+        contentSizeCategory: ContentSizeCategory = .large,
+        dynamicTypeConfig: DynamicTypeConfig? = nil
+    ) -> CGFloat {
+        let config = fontConfig(for: role)
+        let size = fontSize(for: style, contentSizeCategory: contentSizeCategory, dynamicTypeConfig: dynamicTypeConfig)
+        if let customLH = config.lineHeight {
+            let ratio = customLH / fontSize(for: style)
+            return (size * ratio * 2).rounded() / 2
+        }
+        let factor: CGFloat = (style == .body || style == .caption || style == .footnote) ? 1.35 : 1.20
+        return (size * factor * 2).rounded() / 2
+    }
+
     private func calculateFromRatio(ratio: CGFloat, step: Int) -> CGFloat {
         let size = baseSize * pow(ratio, CGFloat(step))
         return (size * 2).rounded() / 2 // round to nearest 0.5pt
@@ -206,6 +239,25 @@ public struct Typography: Equatable, Sendable {
         for (name, config) in customRoles {
             try config.validate(role: .custom(name))
         }
+    }
+}
+
+/// Dynamic type scaling configuration with min and max clamping policies.
+public struct DynamicTypeConfig: Equatable, Sendable {
+    public var minScale: CGFloat
+    public var maxScale: CGFloat
+
+    public init(minScale: CGFloat = 0.8, maxScale: CGFloat = 2.0) {
+        self.minScale = minScale
+        self.maxScale = maxScale
+    }
+
+    public static let standard = DynamicTypeConfig(minScale: 0.8, maxScale: 2.0)
+    public static let accessibility = DynamicTypeConfig(minScale: 0.8, maxScale: 3.5)
+
+    /// Clamps an incoming Dynamic Type scale factor to the allowed range.
+    public func clamp(_ rawScale: CGFloat) -> CGFloat {
+        max(minScale, min(maxScale, rawScale))
     }
 }
 
