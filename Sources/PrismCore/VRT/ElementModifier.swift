@@ -15,6 +15,8 @@ public enum ElementModifier: Equatable, Sendable, CustomStringConvertible {
     case zIndex(Int)
     case explicitKey(String)
     case testID(String)
+    case transition(Transition)
+    case animation(Animation?)
 
     public var description: String {
         switch self {
@@ -33,6 +35,8 @@ public enum ElementModifier: Equatable, Sendable, CustomStringConvertible {
         case .zIndex(let z): return "zIndex(\(z))"
         case .explicitKey(let k): return "key(\"\(k)\")"
         case .testID(let id): return "testID(\"\(id)\")"
+        case .transition(let t): return "transition(\(t))"
+        case .animation(let a): return "animation(\(String(describing: a)))"
         }
     }
 }
@@ -121,7 +125,7 @@ public struct ResolvedStyle: Equatable, Sendable, CustomStringConvertible {
                 style.opacity = max(0.0, min(1.0, style.opacity * o))
             case .zIndex(let z):
                 style.zIndex = z
-            case .explicitKey, .testID:
+            case .explicitKey, .testID, .transition, .animation:
                 break
             }
         }

@@ -253,4 +253,34 @@ extension RenderElement {
         copy.props.custom["clip"] = isClipped ? "true" : "false"
         return copy
     }
+
+    public var transition: Transition? {
+        for modifier in modifiers.reversed() {
+            if case .transition(let t) = modifier {
+                return t
+            }
+        }
+        return nil
+    }
+
+    public var animation: Animation? {
+        for modifier in modifiers.reversed() {
+            if case .animation(let a) = modifier {
+                return a
+            }
+        }
+        return nil
+    }
+
+    public func transition(_ transition: Transition) -> RenderElement {
+        var copy = self
+        copy.modifiers.append(.transition(transition))
+        return copy
+    }
+
+    public func animation(_ animation: Animation?) -> RenderElement {
+        var copy = self
+        copy.modifiers.append(.animation(animation))
+        return copy
+    }
 }

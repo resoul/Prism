@@ -6,6 +6,7 @@ import PrismCore
 public enum P1DemoTab: String, CaseIterable, TabItem {
     case forms
     case components
+    case animations
     case profile
 
     public var id: String { rawValue }
@@ -14,6 +15,7 @@ public enum P1DemoTab: String, CaseIterable, TabItem {
         switch self {
         case .forms: return "Forms"
         case .components: return "Components"
+        case .animations: return "Animations"
         case .profile: return "Profile"
         }
     }
@@ -56,6 +58,8 @@ public struct P1DemoScreen: Component {
                 return renderFormsTab(context: context)
             case .components:
                 return renderComponentsTab(context: context)
+            case .animations:
+                return renderAnimationsTab(context: context)
             case .profile:
                 return renderProfileTab(context: context)
             }
@@ -172,6 +176,24 @@ public struct P1DemoScreen: Component {
         let divider = Divider().body(context: context)
 
         return [badgeRow, label1, label2, divider, infoAlert, errorAlert, spinnerRow, dialogTrigger, tooltip]
+    }
+
+    private func renderAnimationsTab(context: ComponentContext) -> [RenderElement] {
+        let card = Card {
+            CardHeader {
+                CardTitle("Declarative Animations & Spring Physics")
+                CardDescription("Explicit Core Animation bridging with zero presentation/model layer drift")
+            }
+            CardContent {
+                RenderElement(
+                    id: ElementID(typeName: "Text", key: "anim_info"),
+                    kind: .text("Prism drives 60fps animations with full accessibility reduce-motion support.")
+                )
+            }
+        }
+
+        let inspector = AnimationInspector(isVisible: true)
+        return [card.body(context: context), inspector.body(context: context)]
     }
 
     private func renderProfileTab(context: ComponentContext) -> [RenderElement] {

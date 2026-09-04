@@ -144,9 +144,15 @@ public enum Reconciler {
     @discardableResult
     public static func reconcileChildren(
         parent: MountedNode,
-        newElements: [RenderElement]
+        newElements: [RenderElement],
+        context: RenderContext = .default
     ) -> ReconcilerDiff {
         let diffResult = diff(current: parent.children, elements: newElements)
+        let isReduceMotion = ReduceMotionPreference.shouldReduceMotion(
+            transaction: Transaction.current,
+            reduceMotionContext: context.reduceMotion
+        )
+        let activeTransaction = Transaction.current
 
         // 1. Process removals
         var nodesToRemove: Set<ElementID> = []
@@ -154,10 +160,10 @@ public enum Reconciler {
             switch patch {
             case .remove(let node, _):
                 nodesToRemove.insert(node.id)
-                node.unmount()
+                handleRemoval(node: node, parent: parent, isReduceMotion: isReduceMotion, transaction: activeTransaction)
             case .replace(let oldNode, _, _):
                 nodesToRemove.insert(oldNode.id)
-                oldNode.unmount()
+                handleRemoval(node: oldNode, parent: parent, isReduceMotion: isReduceMotion, transaction: activeTransaction)
             default:
                 break
             }
@@ -172,13 +178,33 @@ public enum Reconciler {
         // 3. Construct new children array in exact target order
         var reconciledChildren: [MountedNode] = []
         for elem in newElements {
-            if let existing = nodeRegistry[elem.id], isSameType(old: existing.element.kind, new: elem.kind) {
+            // Check if resurrected from in-flight removal
+            if let resurrected = parent.animatingOutChildren.removeValue(forKey: elem.id),
+               isSameType(old: resurrected.element.kind, new: elem.kind) {
+                resurrected.cancelRemovalAnimation()
+                resurrected.element = elem
+                reconciledChildren.append(resurrected)
+            } else if let existing = nodeRegistry[elem.id], isSameType(old: existing.element.kind, new: elem.kind) {
                 existing.element = elem
                 reconciledChildren.append(existing)
             } else {
                 let newNode = MountedNode(element: elem)
                 newNode.mount(in: parent)
                 reconciledChildren.append(newNode)
+
+                // Insertion transition if present
+                if let transition = elem.transition {
+                    let effectiveAnim = transition.animation ?? activeTransaction.animation
+                    if effectiveAnim != nil || !isReduceMotion {
+                        LayerAnimationBridge.applyInsertion(
+                            layer: newNode.rootLayer,
+                            effect: transition.insertion,
+                            bounds: newNode.rootLayer.bounds,
+                            animation: effectiveAnim ?? .easeInOut(duration: 0.25),
+                            reduceMotion: isReduceMotion
+                        )
+                    }
+                }
             }
         }
 
@@ -187,11 +213,45 @@ public enum Reconciler {
         // 4. Recursively reconcile child subtrees
         for childNode in parent.children {
             if !childNode.element.children.isEmpty {
-                reconcileChildren(parent: childNode, newElements: childNode.element.children)
+                reconcileChildren(parent: childNode, newElements: childNode.element.children, context: context)
             }
         }
 
         return diffResult
+    }
+
+    private static func handleRemoval(
+        node: MountedNode,
+        parent: MountedNode,
+        isReduceMotion: Bool,
+        transaction: Transaction
+    ) {
+        let transition = node.element.transition
+        let effectiveAnim = transition?.animation ?? transaction.animation
+
+        // If animation is explicitly suppressed, or no transition and no ambient transaction:
+        if transaction.disablesAnimations || (transition == nil && effectiveAnim == nil) {
+            node.unmount()
+            return
+        }
+
+        let resolvedTransition = (transition ?? .opacity).resolved(reduceMotion: isReduceMotion)
+        node.isAnimatingRemoval = true
+        parent.animatingOutChildren[node.id] = node
+
+        LayerAnimationBridge.applyRemoval(
+            layer: node.rootLayer,
+            effect: resolvedTransition.removal,
+            bounds: node.rootLayer.bounds,
+            animation: effectiveAnim ?? .easeInOut(duration: 0.25),
+            reduceMotion: isReduceMotion
+        ) { [weak parent, weak node] in
+            guard let parent, let node else { return }
+            if parent.animatingOutChildren[node.id] === node {
+                parent.animatingOutChildren.removeValue(forKey: node.id)
+                node.unmount()
+            }
+        }
     }
 
     // MARK: - 4. Full Tree Reconciliation & Layout Sync
@@ -208,7 +268,7 @@ public enum Reconciler {
         let normalized = newRootElement.normalized()
         rootNode.element = normalized
 
-        let diff = reconcileChildren(parent: rootNode, newElements: normalized.children)
+        let diff = reconcileChildren(parent: rootNode, newElements: normalized.children, context: context)
 
         // Two-pass layout computation
         let layoutTree = LayoutTreeBuilder.build(from: normalized)
@@ -244,11 +304,41 @@ public enum Reconciler {
         layout: LayoutNode,
         context: RenderContext
     ) {
+        let activeAnimation = Transaction.current.animation ?? mounted.element.animation
         var childPairs: [(element: RenderElement, frame: LayoutFrame)] = []
         for (childMounted, childLayout) in zip(mounted.children, layout.children) {
             let frame = childLayout.layoutFrame ?? .zero
+            let childAnim = childMounted.element.animation ?? activeAnimation
+            let oldBounds = childMounted.rootLayer.bounds
+            let oldPosition = childMounted.rootLayer.position
+            let newBounds = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+            let newPosition = CGPoint(x: frame.origin.x + frame.width / 2.0, y: frame.origin.y + frame.height / 2.0)
+
             childMounted.update(newElement: childMounted.element, frame: frame, context: context)
             childPairs.append((childMounted.element, frame))
+
+            if let childAnim, !context.reduceMotion && !Transaction.current.disablesAnimations {
+                if oldBounds != newBounds {
+                    LayerAnimationBridge.animate(
+                        layer: childMounted.rootLayer,
+                        keyPath: "bounds",
+                        targetValue: newBounds,
+                        animation: childAnim,
+                        transactionID: Transaction.current.id,
+                        reduceMotion: context.reduceMotion
+                    )
+                }
+                if oldPosition != newPosition {
+                    LayerAnimationBridge.animate(
+                        layer: childMounted.rootLayer,
+                        keyPath: "position",
+                        targetValue: newPosition,
+                        animation: childAnim,
+                        transactionID: Transaction.current.id,
+                        reduceMotion: context.reduceMotion
+                    )
+                }
+            }
 
             if !childMounted.children.isEmpty {
                 syncLayoutFrames(mounted: childMounted, layout: childLayout, context: context)

@@ -11,6 +11,7 @@ public final class MountedNode {
     public var element: RenderElement
     public weak var parent: MountedNode?
     public var children: [MountedNode] = []
+    public var animatingOutChildren: [ElementID: MountedNode] = [:]
 
     public let renderer: LayerRenderer
     public var rootLayer: CALayer { renderer.rootLayer }
@@ -19,8 +20,19 @@ public final class MountedNode {
     public let updateCoalescer: UpdateCoalescer = UpdateCoalescer()
     public let effectScope: EffectScope = EffectScope()
     public private(set) var isMounted: Bool = false
+    public internal(set) var isAnimatingRemoval: Bool = false
+    public internal(set) var activeRemovalCancellation: (@MainActor () -> Void)?
     public internal(set) var frame: LayoutFrame = .zero
     public weak var overlayHost: OverlayHost?
+
+    /// Cancels an in-flight exit transition when a node is resurrected or re-inserted.
+    public func cancelRemovalAnimation() {
+        guard isAnimatingRemoval else { return }
+        isAnimatingRemoval = false
+        rootLayer.removeAllAnimations()
+        activeRemovalCancellation?()
+        activeRemovalCancellation = nil
+    }
 
     public typealias EventHandler = @MainActor (Event) -> Void
     public private(set) var eventHandlers: [EventType: [EventHandler]] = [:]
