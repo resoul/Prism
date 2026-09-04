@@ -237,6 +237,20 @@ extension RenderElement {
         return copy
     }
 
+    public func accessibilityElement(label: String, role: String? = nil) -> RenderElement {
+        var copy = self
+        copy.props.accessibilityLabel = label
+        if let role {
+            copy.props.custom["accessibilityRole"] = role
+            copy.props.custom["role"] = role
+        }
+        return copy
+    }
+
+    public func render(in context: ComponentContext = .default) -> RenderElement {
+        self
+    }
+
     public func focusable(_ isFocusable: Bool = true, order: Int? = nil) -> RenderElement {
         var copy = self
         copy.props.custom["isFocusable"] = isFocusable ? "true" : "false"
