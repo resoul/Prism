@@ -64,6 +64,10 @@ public struct LayoutFrame: Equatable, Sendable, CustomStringConvertible {
     public var width: Double { size.width }
     public var height: Double { size.height }
 
+    public var rect: CGRect {
+        CGRect(x: origin.x, y: origin.y, width: size.width, height: size.height)
+    }
+
     public var description: String {
         "LayoutFrame(x: \(origin.x), y: \(origin.y), w: \(size.width), h: \(size.height))"
     }

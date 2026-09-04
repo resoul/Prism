@@ -42,6 +42,12 @@ public final class PrismHostEngine {
     }
 
     public private(set) var rootRenderer: ContainerRenderer
+    public private(set) var rootMountedNode: MountedNode
+    public let eventDispatcher: EventDispatcher = EventDispatcher()
+    public let focusTree: FocusTree = FocusTree()
+    public let accessibilityTree: AccessibilityTree = AccessibilityTree()
+    public let shortcutRegistry: KeyboardShortcutRegistry = KeyboardShortcutRegistry()
+
     public private(set) var rootLayoutNode: LayoutNode?
     public private(set) weak var hostLayer: CALayer?
     public private(set) var inspectorLayer: CALayer = CALayer()
@@ -49,16 +55,18 @@ public final class PrismHostEngine {
     public init(rootElement: RenderElement) {
         let normalized = rootElement.normalized()
         self.rootElement = normalized
-        self.rootRenderer = ContainerRenderer(elementID: normalized.id)
+        let renderer = ContainerRenderer(elementID: normalized.id)
+        self.rootRenderer = renderer
+        self.rootMountedNode = MountedNode(element: normalized, renderer: renderer)
         self.inspectorLayer.name = "PrismInspectorOverlay"
+        self.focusTree.rootNode = rootMountedNode
     }
 
     /// Attaches the Prism root CALayer into the host platform view's backing layer.
     public func mount(in containerLayer: CALayer) {
         self.hostLayer = containerLayer
-        if rootRenderer.rootLayer.superlayer != containerLayer {
-            containerLayer.addSublayer(rootRenderer.rootLayer)
-        }
+        rootMountedNode.mount(superlayer: containerLayer)
+        focusTree.rootNode = rootMountedNode
         render()
     }
 
@@ -98,6 +106,20 @@ public final class PrismHostEngine {
         rootRenderer.update(element: normalized, frame: rootFrame, context: renderContext)
         syncSubtree(containerRenderer: rootRenderer, element: normalized, layoutNode: layoutNode, context: renderContext)
 
+        // Reconcile mounted node tree
+        rootMountedNode.element = normalized
+        Reconciler.reconcileTree(
+            rootNode: rootMountedNode,
+            newRootElement: normalized,
+            bounds: bounds,
+            safeArea: safeAreaInsets,
+            context: renderContext
+        )
+
+        // Synchronize FocusTree and AccessibilityTree
+        focusTree.rootNode = rootMountedNode
+        accessibilityTree.update(from: rootMountedNode)
+
         updateInspectorOverlay()
     }
 
@@ -127,12 +149,144 @@ public final class PrismHostEngine {
         }
     }
 
-    /// Detaches layers and destroys renderers cleanly.
+    /// Detaches layers, unmounts mounted tree, resets event states, and destroys renderers cleanly.
     public func teardown() {
         inspectorLayer.removeFromSuperlayer()
         inspectorLayer.sublayers?.removeAll()
         rootRenderer.destroy()
+        rootMountedNode.unmount()
+        focusTree.setFocus(to: nil)
+        focusTree.rootNode = nil
+        eventDispatcher.reset()
+        shortcutRegistry.reset()
         hostLayer = nil
+    }
+
+    // MARK: - Event Dispatching
+
+    /// Dispatches a pointer event (touch/mouse/pen) into the mounted hierarchy.
+    @discardableResult
+    public func dispatchPointerEvent(
+        type: EventType,
+        location: CGPoint,
+        button: PointerButton = .primary,
+        pointerType: PointerType = .mouse,
+        modifiers: EventModifiers = .none,
+        clickCount: Int = 1
+    ) -> EventResult {
+        switch type {
+        case .pointerMove:
+            eventDispatcher.handlePointerMove(location: location, root: rootMountedNode, modifiers: modifiers)
+            return .handled
+        case .pointerDown:
+            return eventDispatcher.handlePointerDown(
+                location: location,
+                root: rootMountedNode,
+                button: button,
+                pointerType: pointerType,
+                modifiers: modifiers,
+                clickCount: clickCount
+            )
+        case .pointerUp:
+            return eventDispatcher.handlePointerUp(
+                location: location,
+                root: rootMountedNode,
+                button: button,
+                pointerType: pointerType,
+                modifiers: modifiers,
+                clickCount: clickCount
+            )
+        default:
+            guard let hit = HitTester.hitTest(point: location, root: rootMountedNode) else { return .ignored }
+            let localPoint = hit.convertToLocal(pointInHost: location)
+            let data = PointerEventData(
+                location: localPoint,
+                globalLocation: location,
+                button: button,
+                pointerType: pointerType,
+                modifiers: modifiers,
+                clickCount: clickCount
+            )
+            let event = Event(type: type, targetID: hit.id, payload: .pointer(data))
+            return eventDispatcher.dispatch(event: event, target: hit)
+        }
+    }
+
+    /// Dispatches a key event, prioritizing shortcuts and Tab/Shift-Tab focus traversal.
+    @discardableResult
+    public func dispatchKeyEvent(
+        type: EventType,
+        key: String,
+        characters: String = "",
+        charactersIgnoringModifiers: String = "",
+        keyCode: UInt16 = 0,
+        modifiers: EventModifiers = .none,
+        isRepeat: Bool = false
+    ) -> EventResult {
+        let keyData = KeyEventData(
+            key: key,
+            characters: characters,
+            charactersIgnoringModifiers: charactersIgnoringModifiers,
+            keyCode: keyCode,
+            modifiers: modifiers,
+            isRepeat: isRepeat
+        )
+
+        let targetNode: MountedNode
+        if let focusedID = focusTree.currentFocus,
+           let focusedNode = findNode(by: focusedID, in: rootMountedNode) {
+            targetNode = focusedNode
+        } else {
+            targetNode = rootMountedNode
+        }
+
+        let event = Event(type: type, targetID: targetNode.id, payload: .key(keyData))
+
+        // 1. Shortcut registry execution on keyDown
+        if type == .keyDown && shortcutRegistry.handleKeyEvent(event) {
+            return .handled
+        }
+
+        // 2. Tab / Shift-Tab focus traversal
+        if type == .keyDown && (keyData.key == "\t" || keyData.keyCode == 48) {
+            let direction: FocusDirection = modifiers.contains(.shift) ? .previous : .next
+            if focusTree.moveFocus(direction: direction) {
+                event.preventDefault()
+                event.stopPropagation()
+                return .handled
+            }
+        }
+
+        return eventDispatcher.dispatch(event: event, target: targetNode)
+    }
+
+    /// Dispatches a scroll event into the mounted hierarchy at the given location.
+    @discardableResult
+    public func dispatchScrollEvent(
+        location: CGPoint,
+        deltaX: Double,
+        deltaY: Double,
+        phase: ScrollPhase = .changed,
+        modifiers: EventModifiers = .none
+    ) -> EventResult {
+        guard let hit = HitTester.hitTest(point: location, root: rootMountedNode) else { return .ignored }
+        let scrollData = ScrollEventData(
+            location: hit.convertToLocal(pointInHost: location),
+            deltaX: deltaX,
+            deltaY: deltaY,
+            phase: phase,
+            modifiers: modifiers
+        )
+        let event = Event(type: .scroll, targetID: hit.id, payload: .scroll(scrollData))
+        return eventDispatcher.dispatch(event: event, target: hit)
+    }
+
+    private func findNode(by id: ElementID, in root: MountedNode) -> MountedNode? {
+        if root.id == id { return root }
+        for child in root.children {
+            if let match = findNode(by: id, in: child) { return match }
+        }
+        return nil
     }
 
     /// Returns a structured diagnostic dump of the host state, element tree, layout trace, and layer tree.

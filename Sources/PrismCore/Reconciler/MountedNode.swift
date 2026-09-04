@@ -19,11 +19,16 @@ public final class MountedNode {
     public let updateCoalescer: UpdateCoalescer = UpdateCoalescer()
     public let effectScope: EffectScope = EffectScope()
     public private(set) var isMounted: Bool = false
+    public internal(set) var frame: LayoutFrame = .zero
 
-    public init(element: RenderElement) {
+    public typealias EventHandler = @MainActor (Event) -> Void
+    public private(set) var eventHandlers: [EventType: [EventHandler]] = [:]
+    public private(set) var capturingHandlers: [EventType: [EventHandler]] = [:]
+
+    public init(element: RenderElement, renderer: LayerRenderer? = nil) {
         self.id = element.id
         self.element = element
-        self.renderer = RendererFactory.create(for: element)
+        self.renderer = renderer ?? RendererFactory.create(for: element)
     }
 
     /// Mounts this node into the parent hierarchy, attaches its CALayer, and triggers .onAppear.
@@ -42,7 +47,39 @@ public final class MountedNode {
     /// Updates the node with a new element snapshot, reusing the existing renderer and CALayer.
     public func update(newElement: RenderElement, frame: LayoutFrame, context: RenderContext) {
         self.element = newElement
+        self.frame = frame
         renderer.update(element: newElement, frame: frame, context: context)
+    }
+
+    /// Registers an event handler for this mounted node.
+    public func addHandler(
+        for type: EventType,
+        phase: EventPhase = .bubbling,
+        handler: @escaping EventHandler
+    ) {
+        if phase == .capturing {
+            capturingHandlers[type, default: []].append(handler)
+        } else {
+            eventHandlers[type, default: []].append(handler)
+        }
+    }
+
+    /// Computes the node's origin and bounds in root host coordinates.
+    public var globalFrame: CGRect {
+        var origin = CGPoint(x: frame.origin.x, y: frame.origin.y)
+        var current = parent
+        while let p = current {
+            origin.x += p.frame.origin.x
+            origin.y += p.frame.origin.y
+            current = p.parent
+        }
+        return CGRect(x: origin.x, y: origin.y, width: frame.width, height: frame.height)
+    }
+
+    /// Converts a point from host window coordinates into this node's local coordinate space.
+    public func convertToLocal(pointInHost: CGPoint) -> CGPoint {
+        let gf = globalFrame
+        return CGPoint(x: pointInHost.x - gf.origin.x, y: pointInHost.y - gf.origin.y)
     }
 
     /// Accesses or initializes local component state for this mounted node.
