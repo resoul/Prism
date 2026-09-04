@@ -65,6 +65,12 @@ import Prism
 import PrismUI
 ```
 
+## Guides
+
+- [Structured logging, privacy and support-file retention](docs/guides/logging.md)
+- [Known limitations](docs/known-limitations.md)
+- [Architecture decisions](docs/adr/)
+
 ---
 
 ## Installation

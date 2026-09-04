@@ -14,3 +14,7 @@ The following limitations are known and expected during the package foundation p
 
 3. **Selective Imports:**
    - `PrismUI` strictly isolates `PrismData` and `PrismStorage`. Networking (`PrismData`) and Persistence (`PrismStorage`) must be explicitly imported or accessed via the umbrella `Prism` package.
+
+4. **Observability:**
+   - `PrismLogging` provides local Console, OSLog and opt-in file diagnostics only. Crash reporting, analytics and remote support-log upload are intentionally not implemented.
+   - File logging is best-effort and may drop records under sustained sink pressure to protect UI responsiveness.
