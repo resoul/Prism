@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- P2 data-entry components: `ButtonGroup`, `NumberField`, `ToggleGroup`, `Slider`, `RangeSlider`, `Stepper`, `Rating`, `InputGroup`, `Select`, and `NativeSelect`, with shared Binding-based range and selection semantics.
 - Initial Swift Package structure supporting iOS 16+, macOS 14+, and tvOS 17+.
 - Modular target structure: `PrismCore`, `PrismUI`, `PrismStorage`, `PrismData`, `PrismLogging`, and umbrella `Prism`.
 - Remote package dependency to `Flux` (v1.1.0).
