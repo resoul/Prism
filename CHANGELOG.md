@@ -80,3 +80,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Four explicit state ownership tiers (`StateOwnershipTier`): `appStore` (Flux), `screenState` (`ComponentContext`), `componentState` (`ComponentStateStore`), and `keyedListItemState` (virtualized list rows).
 - State inspector diagnostics (`StateInspector.dump(for:)`) reporting active Flux subscriptions, running async effects, cancellation reasons, and component state keys.
 - Architecture Decision Record `ADR 0010: Component State, Two-Way Binding, and Lifecycle-Scoped EffectScope` and component state and lifecycle guide.
+- Unified, platform-neutral input event system (`Event`, `EventPhase`, `EventResult`, `EventModifiers`, `PointerType`, `PointerButton`) with strongly-typed pointer, keyboard, scroll, and focus payloads.
+- Three-phase event propagation engine (`EventDispatcher`) implementing capturing, target, and bubbling dispatch with `stopPropagation()` and `preventDefault()` semantics.
+- Reverse-z hit testing engine (`HitTester`) respecting zIndex hierarchy, sibling drawing order, clipping boundaries (`.clipped()`), and element opacity.
+- Hover transition tracking (`.pointerEnter`, `.pointerLeave`) and gesture synthesis (`.tap`).
+- Reactive `FocusTree` managing keyboard Tab order, explicit `focusOrder` prioritization, and 2D spatial direction navigation (`.up`, `.down`, `.left`, `.right`) backed by Flux `CurrentValueDistinct`.
+- Automatic stale focus clearing to prevent focus retention when a focused node unmounts.
+- Synchronized semantic accessibility tree (`AccessibilityTree`) supporting `AccessibilityTraits`, actions (`.activate`, `.increment`, `.decrement`), labels, hints, values, and strict stale record invalidation.
+- Deterministic UI-test identifier lookup (`testID`) in iOS and macOS host view bridges (`findAccessibilityElement(byTestID:)`) isolated from user-facing localized text.
+- System accessibility tokens (`reduceMotion`, `increaseContrast`) added to `LocalizationEnvironment`.
+- Centralized `KeyboardShortcutRegistry` with duplicate shortcut conflict detection diagnostics (`ShortcutConflict`).
+- Architecture Decision Record `ADR 0011: Unified Input Events, FocusTree, and Synchronized Accessibility Tree` and events, focus, and accessibility guide.

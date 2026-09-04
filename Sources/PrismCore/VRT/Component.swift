@@ -160,4 +160,24 @@ extension Component {
     public func accessibilityLabel(_ label: String) -> RenderElement {
         render().accessibilityLabel(label)
     }
+
+    public func accessibilityHint(_ hint: String) -> RenderElement {
+        render().accessibilityHint(hint)
+    }
+
+    public func accessibilityValue(_ value: String) -> RenderElement {
+        render().accessibilityValue(value)
+    }
+
+    public func accessibilityTraits(_ traits: AccessibilityTraits) -> RenderElement {
+        render().accessibilityTraits(traits)
+    }
+
+    public func focusable(_ isFocusable: Bool = true, order: Int? = nil) -> RenderElement {
+        render().focusable(isFocusable, order: order)
+    }
+
+    public func clipped(_ isClipped: Bool = true) -> RenderElement {
+        render().clipped(isClipped)
+    }
 }

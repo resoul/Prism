@@ -218,4 +218,39 @@ extension RenderElement {
         copy.props.accessibilityLabel = label
         return copy
     }
+
+    public func accessibilityHint(_ hint: String) -> RenderElement {
+        var copy = self
+        copy.props.custom["accessibilityHint"] = hint
+        return copy
+    }
+
+    public func accessibilityValue(_ value: String) -> RenderElement {
+        var copy = self
+        copy.props.custom["accessibilityValue"] = value
+        return copy
+    }
+
+    public func accessibilityTraits(_ traits: AccessibilityTraits) -> RenderElement {
+        var copy = self
+        copy.props.custom["accessibilityTraits"] = String(traits.rawValue)
+        return copy
+    }
+
+    public func focusable(_ isFocusable: Bool = true, order: Int? = nil) -> RenderElement {
+        var copy = self
+        copy.props.custom["isFocusable"] = isFocusable ? "true" : "false"
+        if let order {
+            copy.props.custom["focusOrder"] = String(order)
+        } else {
+            copy.props.custom.removeValue(forKey: "focusOrder")
+        }
+        return copy
+    }
+
+    public func clipped(_ isClipped: Bool = true) -> RenderElement {
+        var copy = self
+        copy.props.custom["clip"] = isClipped ? "true" : "false"
+        return copy
+    }
 }

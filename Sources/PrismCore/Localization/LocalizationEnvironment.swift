@@ -7,6 +7,8 @@ public struct LocalizationEnvironment: Equatable, Sendable {
     public var contentSizeCategory: ContentSizeCategory
     public var dynamicTypeConfig: DynamicTypeConfig
     public var pseudoLocalization: Bool
+    public var reduceMotion: Bool
+    public var increaseContrast: Bool
 
     public init(
         locale: Locale = .current,
@@ -20,6 +22,26 @@ public struct LocalizationEnvironment: Equatable, Sendable {
         self.contentSizeCategory = contentSizeCategory
         self.dynamicTypeConfig = dynamicTypeConfig
         self.pseudoLocalization = pseudoLocalization
+        self.reduceMotion = false
+        self.increaseContrast = false
+    }
+
+    public init(
+        locale: Locale = .current,
+        layoutDirection: LayoutDirection? = nil,
+        contentSizeCategory: ContentSizeCategory = .large,
+        dynamicTypeConfig: DynamicTypeConfig = .standard,
+        pseudoLocalization: Bool = false,
+        reduceMotion: Bool,
+        increaseContrast: Bool
+    ) {
+        self.locale = locale
+        self.layoutDirection = layoutDirection ?? LayoutDirection.natural(for: locale)
+        self.contentSizeCategory = contentSizeCategory
+        self.dynamicTypeConfig = dynamicTypeConfig
+        self.pseudoLocalization = pseudoLocalization
+        self.reduceMotion = reduceMotion
+        self.increaseContrast = increaseContrast
     }
 
     public static let standard = LocalizationEnvironment()
@@ -65,6 +87,20 @@ public struct LocalizationEnvironment: Equatable, Sendable {
     public func withContentSizeCategory(_ newCategory: ContentSizeCategory) -> LocalizationEnvironment {
         var copy = self
         copy.contentSizeCategory = newCategory
+        return copy
+    }
+
+    /// Creates an updated environment with the specified reduceMotion preference.
+    public func withReduceMotion(_ reduce: Bool) -> LocalizationEnvironment {
+        var copy = self
+        copy.reduceMotion = reduce
+        return copy
+    }
+
+    /// Creates an updated environment with the specified increaseContrast preference.
+    public func withIncreaseContrast(_ increase: Bool) -> LocalizationEnvironment {
+        var copy = self
+        copy.increaseContrast = increase
         return copy
     }
 }

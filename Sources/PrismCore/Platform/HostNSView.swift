@@ -118,10 +118,132 @@ public final class HostNSView: NSView, PrismHost {
         engine.render()
     }
 
-    public override func viewDidChangeBackingProperties() {
-        super.viewDidChangeBackingProperties()
-        engine.scaleFactor = scaleFactor
-        engine.render()
+    public override var isFlipped: Bool { true }
+    public override var acceptsFirstResponder: Bool { true }
+
+    public func findAccessibilityElement(byTestID testID: String) -> AccessibilityElement? {
+        engine.accessibilityTree.findElement(byTestID: testID)
+    }
+
+    // MARK: - Tracking Areas & Mouse Events
+
+    private var trackingArea: NSTrackingArea?
+
+    public override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let trackingArea {
+            removeTrackingArea(trackingArea)
+        }
+        let options: NSTrackingArea.Options = [.activeInKeyWindow, .mouseMoved, .mouseEnteredAndExited, .inVisibleRect]
+        let area = NSTrackingArea(rect: bounds, options: options, owner: self, userInfo: nil)
+        addTrackingArea(area)
+        self.trackingArea = area
+    }
+
+    public override func mouseDown(with event: NSEvent) {
+        let loc = convert(event.locationInWindow, from: nil)
+        engine.dispatchPointerEvent(
+            type: .pointerDown,
+            location: loc,
+            button: .primary,
+            pointerType: .mouse,
+            modifiers: convertModifiers(event.modifierFlags),
+            clickCount: event.clickCount
+        )
+    }
+
+    public override func mouseUp(with event: NSEvent) {
+        let loc = convert(event.locationInWindow, from: nil)
+        engine.dispatchPointerEvent(
+            type: .pointerUp,
+            location: loc,
+            button: .primary,
+            pointerType: .mouse,
+            modifiers: convertModifiers(event.modifierFlags),
+            clickCount: event.clickCount
+        )
+    }
+
+    public override func mouseMoved(with event: NSEvent) {
+        let loc = convert(event.locationInWindow, from: nil)
+        engine.dispatchPointerEvent(
+            type: .pointerMove,
+            location: loc,
+            button: .none,
+            pointerType: .mouse,
+            modifiers: convertModifiers(event.modifierFlags)
+        )
+    }
+
+    public override func mouseDragged(with event: NSEvent) {
+        let loc = convert(event.locationInWindow, from: nil)
+        engine.dispatchPointerEvent(
+            type: .pointerMove,
+            location: loc,
+            button: .primary,
+            pointerType: .mouse,
+            modifiers: convertModifiers(event.modifierFlags)
+        )
+    }
+
+    public override func scrollWheel(with event: NSEvent) {
+        let loc = convert(event.locationInWindow, from: nil)
+        let phase: ScrollPhase
+        switch event.phase {
+        case .began: phase = .began
+        case .changed: phase = .changed
+        case .ended: phase = .ended
+        case .cancelled: phase = .cancelled
+        default: phase = .changed
+        }
+        engine.dispatchScrollEvent(
+            location: loc,
+            deltaX: Double(event.scrollingDeltaX),
+            deltaY: Double(event.scrollingDeltaY),
+            phase: phase,
+            modifiers: convertModifiers(event.modifierFlags)
+        )
+    }
+
+    public override func keyDown(with event: NSEvent) {
+        let characters = event.characters ?? ""
+        let charsIgnoring = event.charactersIgnoringModifiers ?? ""
+        let handled = engine.dispatchKeyEvent(
+            type: .keyDown,
+            key: characters,
+            characters: characters,
+            charactersIgnoringModifiers: charsIgnoring,
+            keyCode: event.keyCode,
+            modifiers: convertModifiers(event.modifierFlags),
+            isRepeat: event.isARepeat
+        )
+        if handled != .handled {
+            super.keyDown(with: event)
+        }
+    }
+
+    public override func keyUp(with event: NSEvent) {
+        let characters = event.characters ?? ""
+        let charsIgnoring = event.charactersIgnoringModifiers ?? ""
+        engine.dispatchKeyEvent(
+            type: .keyUp,
+            key: characters,
+            characters: characters,
+            charactersIgnoringModifiers: charsIgnoring,
+            keyCode: event.keyCode,
+            modifiers: convertModifiers(event.modifierFlags),
+            isRepeat: event.isARepeat
+        )
+    }
+
+    private func convertModifiers(_ flags: NSEvent.ModifierFlags) -> EventModifiers {
+        var mods: EventModifiers = .none
+        if flags.contains(.shift) { mods.insert(.shift) }
+        if flags.contains(.control) { mods.insert(.control) }
+        if flags.contains(.option) { mods.insert(.option) }
+        if flags.contains(.command) { mods.insert(.command) }
+        if flags.contains(.capsLock) { mods.insert(.capsLock) }
+        return mods
     }
 }
 #endif
