@@ -17,6 +17,7 @@ public final class MountedNode {
 
     public let subscriptionBag: SubscriptionBag = SubscriptionBag()
     public let updateCoalescer: UpdateCoalescer = UpdateCoalescer()
+    public let effectScope: EffectScope = EffectScope()
     public private(set) var isMounted: Bool = false
 
     public init(element: RenderElement) {
@@ -25,7 +26,7 @@ public final class MountedNode {
         self.renderer = RendererFactory.create(for: element)
     }
 
-    /// Mounts this node into the parent hierarchy and attaches its CALayer.
+    /// Mounts this node into the parent hierarchy, attaches its CALayer, and triggers .onAppear.
     public func mount(in parentNode: MountedNode? = nil, superlayer: CALayer? = nil) {
         self.parent = parentNode
         self.isMounted = true
@@ -34,12 +35,22 @@ public final class MountedNode {
         if let targetSuperlayer, rootLayer.superlayer !== targetSuperlayer {
             targetSuperlayer.addSublayer(rootLayer)
         }
+
+        effectScope.triggerAppear()
     }
 
     /// Updates the node with a new element snapshot, reusing the existing renderer and CALayer.
     public func update(newElement: RenderElement, frame: LayoutFrame, context: RenderContext) {
         self.element = newElement
         renderer.update(element: newElement, frame: frame, context: context)
+    }
+
+    /// Accesses or initializes local component state for this mounted node.
+    public func state<T: Sendable & Equatable>(
+        name: String = "default",
+        initial: () -> T
+    ) -> CurrentValueDistinct<T> {
+        ComponentStateStore.shared.state(for: id, name: name, initial: initial)
     }
 
     /// Binds this mounted node to a `CurrentValueDistinct` with automatic cancellation on unmount.
@@ -93,27 +104,33 @@ public final class MountedNode {
         return sub
     }
 
-    /// Recursively tears down this node: cancels all subscriptions, destroys renderer,
-    /// detaches CALayer from superlayer, and unmounts all children.
+    /// Recursively tears down this node: cancels all subscriptions, cancels async effects,
+    /// runs .onDisappear, purges component state, destroys renderer, detaches CALayer, and unmounts children.
     public func unmount() {
         guard isMounted else { return }
         isMounted = false
 
-        // 1. Cancel all active Flux subscriptions and pending coalesced tasks
+        // 1. Run disappear callbacks and cancel all active effects and subscriptions
+        effectScope.triggerDisappear()
+        effectScope.cancelAll(reason: .unmounted)
         subscriptionBag.cancelAll()
         updateCoalescer.cancel()
 
-        // 2. Unmount children recursively
+        // 2. Purge local component state
+        ComponentStateStore.shared.purge(for: id)
+
+        // 3. Unmount children recursively
         for child in children {
             child.unmount()
         }
         children.removeAll()
 
-        // 3. Destroy renderer and detach layer
+        // 4. Destroy renderer and detach layer
         renderer.destroy()
         rootLayer.removeFromSuperlayer()
         parent = nil
     }
+
 
     /// Produces a human-readable visual dump of the mounted node hierarchy.
     public func dumpTree(indent: Int = 0) -> String {

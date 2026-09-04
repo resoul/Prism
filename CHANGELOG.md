@@ -72,3 +72,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - High-frequency update coalescing (`UpdateCoalescer`) buffering rapid state bursts (100+ updates) into a single frame pass while strictly delivering the final settled value.
 - Comprehensive developer reconciliation diff log (`ReconcilerDiff`) with counters for mounts, updates, unmounts, moves, and reused layers.
 - Architecture Decision Record `ADR 0009: VRT Reconciler, MountedNode Lifecycle, and Flux-Driven Reactivity` and reconciler guide.
+- Local component state store (`ComponentStateStore`) retained per `(ElementID, name)`, executing initial state closures once on mount and surviving parent rebuilds.
+- Automatic component state purging on `MountedNode.unmount()` or explicit element key/type change during reconciliation.
+- Two-way data binding (`Binding<Value>`) with getter/setter closures, dynamic member lookup for struct properties, projection mapping (`map`), optional fallback subscripts (`[default:]`), and collection indexing (`[index]`).
+- Reactive feedback loop prevention in bindings via `setIfChanged(_:)` to avoid redundant render passes when assigning identical values.
+- Asynchronous lifecycle effect management (`EffectScope`) supporting `.task(id:priority:operation:)`, `.onAppear`, and `.onDisappear` hooks with automatic structured task cancellation on unmount (`.unmounted`) and ID changes (`.idChanged`).
+- Four explicit state ownership tiers (`StateOwnershipTier`): `appStore` (Flux), `screenState` (`ComponentContext`), `componentState` (`ComponentStateStore`), and `keyedListItemState` (virtualized list rows).
+- State inspector diagnostics (`StateInspector.dump(for:)`) reporting active Flux subscriptions, running async effects, cancellation reasons, and component state keys.
+- Architecture Decision Record `ADR 0010: Component State, Two-Way Binding, and Lifecycle-Scoped EffectScope` and component state and lifecycle guide.

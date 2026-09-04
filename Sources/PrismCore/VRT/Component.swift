@@ -5,6 +5,7 @@ public struct ComponentContext: Sendable {
     public var environment: LocalizationEnvironment
     public var theme: Theme?
     public var values: [String: Sendable]
+    public var screenState: [String: Sendable]
 
     public init(
         environment: LocalizationEnvironment = LocalizationEnvironment(),
@@ -14,10 +15,24 @@ public struct ComponentContext: Sendable {
         self.environment = environment
         self.theme = theme
         self.values = values
+        self.screenState = [:]
+    }
+
+    public init(
+        environment: LocalizationEnvironment = LocalizationEnvironment(),
+        theme: Theme? = nil,
+        values: [String: Sendable] = [:],
+        screenState: [String: Sendable]
+    ) {
+        self.environment = environment
+        self.theme = theme
+        self.values = values
+        self.screenState = screenState
     }
 
     public static let `default` = ComponentContext()
 }
+
 
 /// Abstract protocol for any type that can be converted into an array of RenderElements.
 public protocol ComponentConvertible: Sendable {
