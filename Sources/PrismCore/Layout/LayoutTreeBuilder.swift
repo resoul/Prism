@@ -98,7 +98,12 @@ public enum LayoutTreeBuilder {
             let defaultH = multiline ? 80.0 : 36.0
             return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: defaultH)
 
-        case .stack, .group, .empty, .custom, .portal:
+        case .image:
+            let defaultW = Double(element.props.custom["width"] ?? "0") ?? 40.0
+            let defaultH = Double(element.props.custom["height"] ?? "0") ?? 40.0
+            return ShapeMeasurePolicy(shapeType: .rectangle, defaultDiameter: max(defaultW, defaultH))
+
+        case .stack, .group, .empty, .custom, .portal, .scrollArea:
             return nil
         }
     }
