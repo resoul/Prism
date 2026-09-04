@@ -57,3 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deterministic sublayer z-index ordering and child renderer lifecycle (`destroy()` removes detached layers).
 - Layer diagnostics (`LayerDiagnostics`) with total layer counting, layer tree formatted dumps, and detection of GPU offscreen-rendering hazards (`masksToBounds` combined with shadow).
 - Architecture Decision Record `ADR 0007: CALayer Rendering Pipeline, Node Ownership, and Implicit Action Suppression` and CALayer rendering pipeline guide.
+- Platform host bridge foundation: `PrismHost` protocol and platform-agnostic `@MainActor` `PrismHostEngine` driving two-pass layout (`LayoutTreeBuilder`) and CALayer synchronization without platform framework leaks.
+- Native host view adapters: `HostUIView` (iOS/tvOS) and `HostNSView` (macOS) forwarding bounds, scale factors, safe area insets, and color scheme appearance updates.
+- Universal `PrismHostView` typealias in `PrismUI` providing a unified consumer entry point across platforms.
+- Cross-platform vertical smoke scene (`SmokeScene`) combining theme background, vertical stack, typography, vector shapes (`Rectangle`, `Circle`), `Spacer`, and icons.
+- Developer runtime inspector overlay (`isInspectorOverlayEnabled`) drawing layout wireframe boundaries, plus structured diagnostics dump (`engine.dumpDiagnostics()`).
+- Host lifecycle test suite: 20-pass create/destroy cycles with zero layer accumulation or retention.
+- Architecture Decision Record `ADR 0008: Platform Host Views, Host Engine, and Cross-Platform Smoke Verification` and platform host & smoke test guide.
