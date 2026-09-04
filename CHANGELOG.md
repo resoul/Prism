@@ -50,3 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-model positioning: `.flow`, `.absolute` (with `top`, `leading`, `bottom`, `trailing` offsets and containing block resolution), `.fixed` (viewport-relative), and `zIndex` stacking order; absolute children do not expand flow container dimensions.
 - Formatted layout tree trace diagnostics (`LayoutTrace.dump` / `node.dumpTrace()`).
 - Architecture Decision Record `ADR 0006: Flexbox Layout Engine & Multi-Model Positioning` and flex layout guide.
+- CALayer rendering pipeline: `@MainActor` layer ownership model (`LayerRenderer`, `RendererFactory`), container renderer (`ContainerRenderer`), vector shape renderer (`ShapeRenderer` for `Rectangle` and `Circle`), and text renderer (`TextRenderer` with `CATextLayer` and CoreText typography).
+- Implicit Core Animation action suppression by default via `RenderTransaction.perform(disableActions: true)`.
+- Idempotent layer tree synchronization with element ID keying: zero duplicate layers and zero leaks across 100 repeated render passes.
+- Display scale factor support (`@1x`, `@2x`, `@3x`) on `CATextLayer.contentsScale` for crisp Retina rendering.
+- Deterministic sublayer z-index ordering and child renderer lifecycle (`destroy()` removes detached layers).
+- Layer diagnostics (`LayerDiagnostics`) with total layer counting, layer tree formatted dumps, and detection of GPU offscreen-rendering hazards (`masksToBounds` combined with shadow).
+- Architecture Decision Record `ADR 0007: CALayer Rendering Pipeline, Node Ownership, and Implicit Action Suppression` and CALayer rendering pipeline guide.

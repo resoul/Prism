@@ -1,0 +1,18 @@
+import Foundation
+import QuartzCore
+
+/// Factory for instantiating the appropriate `LayerRenderer` for a given `RenderElement`.
+@MainActor
+public enum RendererFactory {
+    /// Creates and returns a concrete `LayerRenderer` implementation matching the element's kind.
+    public static func create(for element: RenderElement) -> LayerRenderer {
+        switch element.kind {
+        case .text:
+            return TextRenderer(elementID: element.id)
+        case .shape:
+            return ShapeRenderer(elementID: element.id)
+        case .stack, .icon, .spacer, .custom, .group, .empty:
+            return ContainerRenderer(elementID: element.id)
+        }
+    }
+}
