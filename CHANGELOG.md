@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `GridLayoutSolver` for deterministic fixed, fractional,
+  minmax, spanning, constrained, and RTL grid geometry.
 - Release-gate artifacts: executable P0/P1/P2 catalog manifest, catalog tests, first-app and architecture docs, baseline procedure, 0.x release checklist, MIT licence, and dependency notice.
 - P2 overlay, feedback, and navigation APIs: toast queueing/deduplication, progress, breadcrumbs, pagination, navigation menus, and semantic modal/floating overlay surfaces with deterministic single-modal coordination.
 - P2 data-entry components: `ButtonGroup`, `NumberField`, `ToggleGroup`, `Slider`, `RangeSlider`, `Stepper`, `Rating`, `InputGroup`, `Select`, and `NativeSelect`, with shared Binding-based range and selection semantics.
