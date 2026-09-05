@@ -112,6 +112,14 @@ public struct Button: Component {
         props.custom["size"] = size.rawValue
         props.custom["isDisabled"] = isDisabled ? "true" : "false"
         props.custom["isLoading"] = isLoading ? "true" : "false"
+        props.custom["isButton"] = "true"
+        props.custom["accessibilityTraits"] = String(AccessibilityTraits.button.rawValue)
+        props.accessibilityLabel = title
+
+        let buttonID = ElementID(typeName: "Button", key: title)
+        if !isDisabled {
+            ActionRegistry.shared.register(action: action, for: buttonID)
+        }
 
         var element = HStack(spacing: 8) {
             Text(title)
@@ -122,6 +130,8 @@ public struct Button: Component {
         .background(bgColor)
         .opacity(isDisabled ? 0.5 : 1.0)
 
+        element.id = buttonID
+        element.props.accessibilityLabel = title
         element.props.custom.merge(props.custom) { _, new in new }
         return element
     }

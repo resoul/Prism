@@ -210,6 +210,19 @@ extension RenderElement {
         var copy = self
         copy.props.testID = id
         copy.modifiers.append(.testID(id))
+        if let act = ActionRegistry.shared.action(for: self.id) {
+            ActionRegistry.shared.register(action: act, forTestID: id)
+        }
+        return copy
+    }
+
+    public func onTap(_ action: @escaping @MainActor () -> Void) -> RenderElement {
+        ActionRegistry.shared.register(action: action, for: self.id)
+        if let testID = self.props.testID {
+            ActionRegistry.shared.register(action: action, forTestID: testID)
+        }
+        var copy = self
+        copy.props.custom["isButton"] = "true"
         return copy
     }
 

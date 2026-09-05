@@ -9,7 +9,7 @@ import UIKit
 /// Platform-internal text input bridge coordinating IME marked text, clipboard actions,
 /// key navigation, and system text input protocols without exposing platform types in public API.
 @MainActor
-public final class PlatformTextInputAdapter: @unchecked Sendable {
+public final class PlatformTextInputAdapter {
     public static let shared = PlatformTextInputAdapter()
 
     public weak var activeDocument: TextDocument?
