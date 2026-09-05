@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `FileUploadCoordinator` with bounded validation,
+  cancellation/retry statuses, filename sanitization, and injected transport.
 - Experimental P3 `OTPDocument`/`InputOtp` contracts with bounded paste,
   backspace/autofill handling, visual segments, and privacy-safe AX semantics.
 - Experimental P3 `PhoneInput`/`PhoneNumber` contracts with country-aware
