@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pointer capture and cancellation in `EventDispatcher`, native iOS and macOS accessibility
   element bridging (`UIAccessibilityElement`/`NSAccessibilityElement`), text input focus and
   iOS keyboard safe-area inset coordination, and Space/Return activation in `PrismHostEngine`.
+- Showcase Theme Presets and Live Appearance (Task 23d): Bundled Light, Dark, Midnight,
+  Forest, and Sand theme presets in `PrismShowcase`, isolated `ShowcasePreferences` persistence
+  with `-showcaseReset` support, live theme updating across `PrismHostEngine`, `HostUIView`, and
+  `HostNSView`, preserving draft input, counter, and scroll state across appearance changes,
+  additive `ThemeID.forest`, `ThemeID.sand`, `ThemeSelection.forest`, `ThemeSelection.sand`, and
+  `ThemeColors.defaultDark` tokens, unit tests in `ShowcaseThemeTests`, and `docs/examples/Extending.md` guide.
 - Experimental P3 `GanttModel`/`Gantt` contracts with dependency cycle validation,
   zoom, cancellable rescheduling, bounded visible tasks, and AX table output.
 - Experimental P3 `KanbanModel`/`Kanban` contracts with stable card/column IDs,

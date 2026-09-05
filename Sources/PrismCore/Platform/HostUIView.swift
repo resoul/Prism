@@ -17,8 +17,17 @@ public final class HostUIView: UIView, PrismHost {
     public var onColorSchemeChange: ((ColorScheme) -> Void)?
     public var onTeardown: (() -> Void)?
 
-    public init(element: RenderElement) {
-        self.engine = PrismHostEngine(rootElement: element)
+    public var theme: Theme? {
+        get { engine.theme }
+        set { engine.theme = newValue }
+    }
+
+    public convenience init(element: RenderElement) {
+        self.init(element: element, theme: nil)
+    }
+
+    public init(element: RenderElement, theme: Theme?) {
+        self.engine = PrismHostEngine(rootElement: element, theme: theme)
         super.init(frame: .zero)
         setupHost()
     }
@@ -36,6 +45,10 @@ public final class HostUIView: UIView, PrismHost {
 
     public func setRootElement(_ element: RenderElement) {
         engine.rootElement = element
+    }
+
+    public func setTheme(_ theme: Theme?) {
+        engine.setTheme(theme)
     }
 
     public func render() {

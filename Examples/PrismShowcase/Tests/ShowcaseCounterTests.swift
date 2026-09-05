@@ -8,10 +8,12 @@ final class ShowcaseCounterTests: XCTestCase {
     override func setUp() {
         super.setUp()
         ActionRegistry.shared.reset()
+        ShowcasePreferences().reset()
     }
 
     override func tearDown() {
         ActionRegistry.shared.reset()
+        ShowcasePreferences().reset()
         super.tearDown()
     }
 
@@ -29,6 +31,13 @@ final class ShowcaseCounterTests: XCTestCase {
         XCTAssertTrue(tree.contains("showcase.input_submit"))
         XCTAssertTrue(tree.contains("showcase.scroll_area"))
         XCTAssertTrue(tree.contains("showcase.scroll_status"))
+        XCTAssertTrue(tree.contains("showcase.theme.status"))
+        XCTAssertTrue(tree.contains("showcase.theme.system"))
+        XCTAssertTrue(tree.contains("showcase.theme.light"))
+        XCTAssertTrue(tree.contains("showcase.theme.dark"))
+        XCTAssertTrue(tree.contains("showcase.theme.midnight"))
+        XCTAssertTrue(tree.contains("showcase.theme.forest"))
+        XCTAssertTrue(tree.contains("showcase.theme.sand"))
     }
 
     func testFluxStateTransitionsAndMainActorOwnership() {

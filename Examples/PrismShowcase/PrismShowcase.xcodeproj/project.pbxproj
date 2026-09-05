@@ -17,6 +17,10 @@
 		A10000000000000000000009 /* ShowcaseCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* ShowcaseCounter.swift */; };
 		A10000000000000000000010 /* ShowcaseCounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* ShowcaseCounterTests.swift */; };
 		A10000000000000000000011 /* PrismUI in Frameworks */ = {isa = PBXBuildFile; productRef = A50000000000000000000003 /* PrismUI */; };
+		A10000000000000000000012 /* ShowcaseThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* ShowcaseThemePresets.swift */; };
+		A10000000000000000000013 /* ShowcaseThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* ShowcaseThemePresets.swift */; };
+		A10000000000000000000014 /* ShowcaseThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* ShowcaseThemePresets.swift */; };
+		A10000000000000000000015 /* ShowcaseThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* ShowcaseThemeTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +34,8 @@
 		A20000000000000000000003 /* macOS AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A20000000000000000000004 /* ShowcaseLaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseLaunchUITests.swift; sourceTree = "<group>"; };
 		A20000000000000000000009 /* ShowcaseCounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseCounterTests.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* ShowcaseThemePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseThemePresets.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* ShowcaseThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseThemeTests.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* PrismShowcase-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PrismShowcase-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000006 /* PrismShowcase-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PrismShowcase-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000007 /* PrismShowcase-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PrismShowcase-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,11 +53,11 @@
 
 /* Begin PBXGroup section */
 		A60000000000000000000001 = {isa = PBXGroup; children = (A60000000000000000000002 /* Shared */, A60000000000000000000003 /* iOS */, A60000000000000000000004 /* macOS */, A60000000000000000000005 /* UITests */, A60000000000000000000007 /* Tests */, A60000000000000000000006 /* Products */,); sourceTree = "<group>"; };
-		A60000000000000000000002 = {isa = PBXGroup; children = (A20000000000000000000001 /* ShowcaseCounter.swift */,); path = Shared; sourceTree = "<group>"; };
+		A60000000000000000000002 = {isa = PBXGroup; children = (A20000000000000000000001 /* ShowcaseCounter.swift */, A20000000000000000000011 /* ShowcaseThemePresets.swift */,); path = Shared; sourceTree = "<group>"; };
 		A60000000000000000000003 = {isa = PBXGroup; children = (A20000000000000000000002 /* iOS AppDelegate.swift */,); path = iOS; sourceTree = "<group>"; };
 		A60000000000000000000004 = {isa = PBXGroup; children = (A20000000000000000000003 /* macOS AppDelegate.swift */,); path = macOS; sourceTree = "<group>"; };
 		A60000000000000000000005 = {isa = PBXGroup; children = (A20000000000000000000004 /* ShowcaseLaunchUITests.swift */,); path = UITests; sourceTree = "<group>"; };
-		A60000000000000000000007 = {isa = PBXGroup; children = (A20000000000000000000009 /* ShowcaseCounterTests.swift */,); path = Tests; sourceTree = "<group>"; };
+		A60000000000000000000007 = {isa = PBXGroup; children = (A20000000000000000000009 /* ShowcaseCounterTests.swift */, A20000000000000000000012 /* ShowcaseThemeTests.swift */,); path = Tests; sourceTree = "<group>"; };
 		A60000000000000000000006 = {isa = PBXGroup; children = (A20000000000000000000005 /* PrismShowcase-iOS.app */, A20000000000000000000006 /* PrismShowcase-macOS.app */, A20000000000000000000007 /* PrismShowcase-iOSUITests.xctest */, A20000000000000000000008 /* PrismShowcase-macOSUITests.xctest */, A20000000000000000000010 /* PrismShowcase-macOSTests.xctest */,); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -71,11 +77,11 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A11000000000000000000001 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* ShowcaseCounter.swift in Sources */, A10000000000000000000002 /* iOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
-		A11000000000000000000002 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000004 /* ShowcaseCounter.swift in Sources */, A10000000000000000000005 /* macOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A11000000000000000000001 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* ShowcaseCounter.swift in Sources */, A10000000000000000000012 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000002 /* iOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A11000000000000000000002 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000004 /* ShowcaseCounter.swift in Sources */, A10000000000000000000013 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000005 /* macOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 		A11000000000000000000003 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000007 /* iOS UI tests in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 		A11000000000000000000004 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000008 /* macOS UI tests in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
-		A11000000000000000000005 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000009 /* ShowcaseCounter.swift in Sources */, A10000000000000000000010 /* ShowcaseCounterTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A11000000000000000000005 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000009 /* ShowcaseCounter.swift in Sources */, A10000000000000000000014 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000010 /* ShowcaseCounterTests.swift in Sources */, A10000000000000000000015 /* ShowcaseThemeTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */

@@ -205,6 +205,23 @@ public struct ThemeColors: Equatable, Sendable {
         accentForeground: Color(red: 0.06, green: 0.09, blue: 0.16),
         custom: [:]
     )
+
+    public static let defaultDark = ThemeColors(
+        background: Color(red: 0.06, green: 0.09, blue: 0.16),
+        foreground: Color(red: 0.97, green: 0.98, blue: 0.99),
+        primary: Color(red: 0.51, green: 0.48, blue: 1.0),
+        primaryForeground: .white,
+        secondary: Color(red: 0.12, green: 0.15, blue: 0.23),
+        secondaryForeground: Color(red: 0.97, green: 0.98, blue: 0.99),
+        muted: Color(red: 0.12, green: 0.15, blue: 0.23),
+        mutedForeground: Color(red: 0.58, green: 0.64, blue: 0.72),
+        border: Color(red: 0.20, green: 0.24, blue: 0.32),
+        destructive: Color(red: 0.94, green: 0.27, blue: 0.38),
+        destructiveForeground: .white,
+        accent: Color(red: 0.12, green: 0.15, blue: 0.23),
+        accentForeground: Color(red: 0.97, green: 0.98, blue: 0.99),
+        custom: [:]
+    )
 }
 
 /// Declarative color specification used in PrismConfig and theme definitions.

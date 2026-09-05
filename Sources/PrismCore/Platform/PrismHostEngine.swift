@@ -23,6 +23,12 @@ public final class PrismHostEngine {
         }
     }
 
+    public var theme: Theme? = nil {
+        didSet {
+            if oldValue != theme { render() }
+        }
+    }
+
     public var safeAreaInsets: DirectionalEdgeInsets = .zero {
         didSet {
             if oldValue != safeAreaInsets { render() }
@@ -57,9 +63,14 @@ public final class PrismHostEngine {
     public private(set) weak var hostLayer: CALayer?
     public private(set) var inspectorLayer: CALayer = CALayer()
 
-    public init(rootElement: RenderElement) {
+    public convenience init(rootElement: RenderElement) {
+        self.init(rootElement: rootElement, theme: nil)
+    }
+
+    public init(rootElement: RenderElement, theme: Theme?) {
         let normalized = rootElement.normalized()
         self.rootElement = normalized
+        self.theme = theme
         let renderer = ContainerRenderer(elementID: normalized.id)
         self.rootRenderer = renderer
         self.rootMountedNode = MountedNode(element: normalized, renderer: renderer)
@@ -67,6 +78,11 @@ public final class PrismHostEngine {
         self.focusTree.rootNode = rootMountedNode
         self.overlayHost.engine = self
         self.rootMountedNode.overlayHost = self.overlayHost
+    }
+
+    /// Updates the active theme and triggers an immediate re-render.
+    public func setTheme(_ theme: Theme?) {
+        self.theme = theme
     }
 
     /// Attaches the Prism root CALayer into the host platform view's backing layer.
@@ -106,6 +122,7 @@ public final class PrismHostEngine {
 
         let renderContext = RenderContext(
             scaleFactor: scaleFactor,
+            theme: theme,
             colorScheme: colorScheme,
             disableActions: true
         )

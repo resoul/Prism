@@ -14,6 +14,8 @@ public enum ThemeSelection: Hashable, Sendable {
     public static let light = ThemeSelection.explicit(.light)
     public static let dark = ThemeSelection.explicit(.dark)
     public static let midnight = ThemeSelection.explicit(.midnight)
+    public static let forest = ThemeSelection.explicit(.forest)
+    public static let sand = ThemeSelection.explicit(.sand)
 
     public static func named(_ id: ThemeID) -> ThemeSelection {
         .explicit(id)
