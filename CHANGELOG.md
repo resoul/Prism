@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `DataGridViewport`/`DataGrid` contracts with variable axis
+  metrics, bounded mounted cells, pinned headers, anchors, and logical AX coordinates.
 - Experimental P3 `TreeModel`/`LazyTreeLoader`/`Tree` contracts with stable
   ancestry, expansion, cancellable lazy loading, and bounded visible rows.
 - Experimental P3 `CommandRegistry`/`CommandPaletteEngine` contracts with
