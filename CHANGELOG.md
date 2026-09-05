@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `MenubarModel`/`Menubar` contracts with hierarchical command
+  state, keyboard navigation, shortcut conflict handling, and focus metadata.
 - Experimental P3 `SortableListModel`/`Sortable` contracts with stable-ID
   reorder, keyboard alternatives, cancellation, and bounded visible windows.
 - Experimental P3 `ResizableSplit`/`Resizable` contracts with bounded ratios,
