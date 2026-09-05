@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `CalendarLayout`/`CalendarView` contracts for deterministic
+  month/week/day cells, locale-first weekdays, selected dates, and RTL metadata.
 - Experimental P3 `DataGridInteractionModel`/`DataGridInteractionProvider`
   contracts with ID selection, sort/filter descriptors, and stale-load cancellation.
 - Experimental P3 typed `FilterModel`/`FilterEditor` contracts with composable
