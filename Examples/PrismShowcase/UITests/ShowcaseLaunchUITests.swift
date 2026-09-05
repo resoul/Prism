@@ -11,11 +11,52 @@ final class ShowcaseLaunchUITests: XCTestCase {
         app.launchArguments = ["-showcaseReset"]
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+
+        let title = app.staticTexts["showcase.title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+
+        let browseBtn = app.buttons["showcase.welcome.browse"]
+        XCTAssertTrue(browseBtn.waitForExistence(timeout: 3))
+    }
+
+    func testNavigationFromWelcomeToCategoriesAndDetail() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-showcaseReset"]
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+
+        let browseBtn = app.buttons["showcase.welcome.browse"]
+        XCTAssertTrue(browseBtn.waitForExistence(timeout: 3))
+        browseBtn.tap()
+
+        let categoriesTitle = app.staticTexts["showcase.categories.title"]
+        XCTAssertTrue(categoriesTitle.waitForExistence(timeout: 3))
+
+        let formsCategory = app.buttons["showcase.category.forms"]
+        XCTAssertTrue(formsCategory.waitForExistence(timeout: 3))
+        formsCategory.tap()
+
+        let categoryTitle = app.staticTexts["showcase.category.title"]
+        XCTAssertTrue(categoryTitle.waitForExistence(timeout: 3))
+
+        let counterComp = app.buttons["showcase.component.counter"]
+        XCTAssertTrue(counterComp.waitForExistence(timeout: 3))
+        counterComp.tap()
+
+        let counter = app.staticTexts["showcase.counter"]
+        XCTAssertTrue(counter.waitForExistence(timeout: 3))
+
+        let backBtn = app.buttons["showcase.navigation.back"]
+        XCTAssertTrue(backBtn.waitForExistence(timeout: 3))
+        backBtn.tap()
+
+        // Returned to category list
+        XCTAssertTrue(categoryTitle.waitForExistence(timeout: 3))
     }
 
     func testNativeIncrementAndResetInteraction() {
         let app = XCUIApplication()
-        app.launchArguments = ["-showcaseReset"]
+        app.launchArguments = ["-showcaseReset", "-showcaseRoute", "counter"]
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
 
@@ -46,12 +87,9 @@ final class ShowcaseLaunchUITests: XCTestCase {
 
     func testNativeInputAndScrollControls() {
         let app = XCUIApplication()
-        app.launchArguments = ["-showcaseReset"]
+        app.launchArguments = ["-showcaseReset", "-showcaseRoute", "counter"]
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
-
-        let title = app.staticTexts["showcase.title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 3))
 
         let scrollStatus = app.staticTexts["showcase.scroll_status"]
         XCTAssertTrue(scrollStatus.waitForExistence(timeout: 3))
@@ -62,5 +100,22 @@ final class ShowcaseLaunchUITests: XCTestCase {
         scrollDownBtn.tap()
 
         XCTAssertEqual(scrollStatus.label, "Scroll offset: 20")
+    }
+
+    func testNotFoundRouteShowsRecoverableScreen() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-showcaseReset", "-showcaseRoute", "component/nonexistent_xyz"]
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+
+        let notFoundTitle = app.staticTexts["showcase.not_found.title"]
+        XCTAssertTrue(notFoundTitle.waitForExistence(timeout: 3))
+
+        let returnBtn = app.buttons["showcase.not_found.return_button"]
+        XCTAssertTrue(returnBtn.waitForExistence(timeout: 3))
+        returnBtn.tap()
+
+        let categoriesTitle = app.staticTexts["showcase.categories.title"]
+        XCTAssertTrue(categoriesTitle.waitForExistence(timeout: 3))
     }
 }

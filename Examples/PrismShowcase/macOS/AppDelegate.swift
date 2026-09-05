@@ -14,6 +14,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let host = HostNSView(element: store.rootElement(), theme: store.activeTheme)
         host.setAccessibilityIdentifier("showcase.host")
+        store.setContainerWidth(800)
+        host.onBoundsChange = { [weak store] bounds in
+            store?.setContainerWidth(bounds.width)
+        }
         store.onChange = { [weak host] element in host?.setRootElement(element) }
         store.onThemeChange = { [weak host] theme in host?.setTheme(theme) }
 
