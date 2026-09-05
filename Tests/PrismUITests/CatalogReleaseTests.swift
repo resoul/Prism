@@ -20,4 +20,34 @@ final class CatalogReleaseTests: XCTestCase {
     func testAccessibilityAuditFixtureBuilds() {
         XCTAssertFalse(AccessibilityAuditScreen().render().children.isEmpty)
     }
+
+    func testHostPersistsSelectionAndControlsAcrossRebuild() {
+        let store = PrismCatalogStore()
+        let host = PrismCatalogHost(store: store)
+
+        let initial = host.render()
+        XCTAssertEqual(initial.props.custom["selectedEntry"], "")
+
+        store.select(id: "button")
+        store.setTheme("dark")
+        store.toggleReduceMotion()
+        store.toggleHighContrast()
+
+        let rebuilt = host.render()
+        XCTAssertEqual(rebuilt.props.custom["selectedEntry"], "button")
+        XCTAssertEqual(rebuilt.props.custom["theme"], "dark")
+        XCTAssertEqual(rebuilt.props.custom["reduceMotion"], "true")
+        XCTAssertEqual(rebuilt.props.custom["highContrast"], "true")
+        XCTAssertEqual(rebuilt.props.custom["interactionCount"], "4")
+        XCTAssertFalse(rebuilt.children.isEmpty)
+    }
+
+    func testHostTierFilterAndSelectionAreStable() {
+        let store = PrismCatalogStore(tier: .p2)
+        store.select(id: "accordion")
+        let element = PrismCatalogHost(store: store).render()
+        XCTAssertEqual(element.props.custom["catalogTier"], "p2")
+        XCTAssertEqual(element.props.custom["selectedEntry"], "accordion")
+        XCTAssertEqual(store.selectedEntry()?.component, "Accordion")
+    }
 }

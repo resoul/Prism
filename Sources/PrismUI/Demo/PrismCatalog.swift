@@ -52,3 +52,157 @@ public struct PrismCatalogScreen: Component {
         return element
     }
 }
+
+/// Persisted state for a catalog host. A host keeps this reference while the
+/// render tree is rebuilt, so selecting an example or changing a control never
+/// resets the developer's current scenario.
+public final class PrismCatalogStore: @unchecked Sendable {
+    public var selectedEntryID: String?
+    public var tier: CatalogTier?
+    public var contentSize: ContentSizeCategory
+    public var reduceMotion: Bool
+    public var highContrast: Bool
+    public var themeName: String
+    public private(set) var interactionCount: Int = 0
+
+    public init(
+        tier: CatalogTier? = nil,
+        contentSize: ContentSizeCategory = .large,
+        reduceMotion: Bool = false,
+        highContrast: Bool = false,
+        themeName: String = "light"
+    ) {
+        self.tier = tier
+        self.contentSize = contentSize
+        self.reduceMotion = reduceMotion
+        self.highContrast = highContrast
+        self.themeName = themeName
+    }
+
+    public func select(_ entry: CatalogEntry) { selectedEntryID = entry.id; interactionCount += 1 }
+    public func select(id: String) { selectedEntryID = id; interactionCount += 1 }
+    public func toggleReduceMotion() { reduceMotion.toggle(); interactionCount += 1 }
+    public func toggleHighContrast() { highContrast.toggle(); interactionCount += 1 }
+    public func setTheme(_ theme: String) { themeName = theme; interactionCount += 1 }
+    public func setContentSize(_ size: ContentSizeCategory) { contentSize = size; interactionCount += 1 }
+    public func recordInteraction() { interactionCount += 1 }
+    public func selectedEntry(in entries: [CatalogEntry] = PrismCatalog.entries) -> CatalogEntry? {
+        guard let selectedEntryID else { return nil }
+        return entries.first { $0.id == selectedEntryID }
+    }
+}
+
+/// Runnable catalog host composition used by iOS and macOS adapters.
+/// The host exposes stable test IDs for navigation, controls, inspectors, and
+/// the selected isolated example; platform hosts only need to mount this tree.
+public struct PrismCatalogHost: Component {
+    public let store: PrismCatalogStore
+
+    public init(store: PrismCatalogStore = PrismCatalogStore()) { self.store = store }
+
+    public func body(context: ComponentContext) -> RenderElement {
+        let visibleEntries = store.tier.map(PrismCatalog.entries(tier:)) ?? PrismCatalog.entries
+        let selected = store.selectedEntry(in: visibleEntries)
+
+        var root = VStack(alignment: .stretch, spacing: 12) {
+            Text("Prism Catalog — (visibleEntries.count) isolated examples")
+                .font(.heading)
+                .testID("catalog.title")
+            HStack(spacing: 8) {
+                Button("Light", variant: store.themeName == "light" ? .primary : .outline) { store.setTheme("light") }
+                    .testID("catalog.theme.light")
+                Button("Dark", variant: store.themeName == "dark" ? .primary : .outline) { store.setTheme("dark") }
+                    .testID("catalog.theme.dark")
+                Button("Contrast", variant: store.highContrast ? .primary : .outline) { store.toggleHighContrast() }
+                    .testID("catalog.control.contrast")
+                Button("Motion", variant: store.reduceMotion ? .secondary : .outline) { store.toggleReduceMotion() }
+                    .testID("catalog.control.motion")
+            }
+            HStack(spacing: 8) {
+                for tier in CatalogTier.allCases {
+                    Button(tier.rawValue.uppercased(), variant: store.tier == tier ? .primary : .outline) {
+                        store.tier = tier; store.recordInteraction()
+                    }.testID("catalog.tier.\(tier.rawValue)")
+                }
+            }
+            HStack(alignment: .start, spacing: 16) {
+                VStack(alignment: .stretch, spacing: 4) {
+                    Text("Examples").font(.heading)
+                    for entry in visibleEntries {
+                        Button(entry.component, variant: selected?.id == entry.id ? .secondary : .ghost, size: .sm) {
+                            store.select(entry)
+                        }
+                        .testID("catalog.entry.\(entry.id)")
+                        .accessibilityLabel("Open \(entry.component) example")
+                    }
+                }
+                .testID("catalog.entry-list")
+
+                VStack(alignment: .stretch, spacing: 8) {
+                    if let selected {
+                        CatalogExampleScreen(entry: selected, store: store)
+                            .testID("catalog.example.\(selected.id)")
+                    } else {
+                        Empty(title: "Select an example", description: "Choose a component to inspect its real stateful scenario.")
+                            .testID("catalog.empty")
+                    }
+                    CatalogInspector(store: store, selected: selected)
+                }
+                .testID("catalog.detail")
+            }
+        }
+        .padding(20)
+        .render(in: context)
+        root.props.custom["catalogTier"] = store.tier?.rawValue ?? "all"
+        root.props.custom["selectedEntry"] = store.selectedEntryID ?? ""
+        root.props.custom["contentSize"] = store.contentSize.rawValue
+        root.props.custom["reduceMotion"] = store.reduceMotion ? "true" : "false"
+        root.props.custom["highContrast"] = store.highContrast ? "true" : "false"
+        root.props.custom["theme"] = store.themeName
+        root.props.custom["interactionCount"] = String(store.interactionCount)
+        return root
+    }
+}
+
+private struct CatalogInspector: Component {
+    let store: PrismCatalogStore
+    let selected: CatalogEntry?
+
+    func body(context: ComponentContext) -> RenderElement {
+        VStack(alignment: .stretch, spacing: 4) {
+            Text("Inspectors").font(.heading)
+            Text("Tree: \(selected?.component ?? "none")")
+            Text("Layout: size=\(store.contentSize.rawValue), contrast=\(store.highContrast ? "high" : "standard")")
+            Text("Animation: reduceMotion=\(store.reduceMotion)")
+            Text("Theme: \(store.themeName)")
+        }
+        .padding(12)
+        .testID("catalog.inspectors")
+        .render(in: context)
+    }
+}
+
+private struct CatalogExampleScreen: Component {
+    let entry: CatalogEntry
+    let store: PrismCatalogStore
+
+    func body(context: ComponentContext) -> RenderElement {
+        let sampleBinding = Binding<String>(get: { store.selectedEntryID ?? entry.id }, set: { store.select(id: $0) })
+        switch entry.component {
+        case "Badge": return Badge("Ready").render(in: context)
+        case "Card": return Card { CardHeader { Text("Card example") }; CardContent { Text("Stateful isolated content") } }.render(in: context)
+        case "Button": return Button("Activate", action: { store.recordInteraction() }).testID("example.action").render(in: context)
+        case "Input": return Input("Name", text: sampleBinding).render(in: context)
+        case "CodeBlock": return CodeBlock(code: "let prism = true", language: "swift").render(in: context)
+        case "Kbd": return Kbd("⌘K").render(in: context)
+        case "Skeleton": return Skeleton().render(in: context)
+        case "Empty": return Empty(title: "No results", actionTitle: "Retry", onAction: { store.recordInteraction() }).render(in: context)
+        case "Accordion":
+            let expanded = Binding<Set<String>>(get: { store.selectedEntryID == entry.id ? [entry.id] : [] }, set: { _ in store.select(entry) })
+            return Accordion(items: [AccordionItem(id: entry.id, title: "Details") { Text("Accordion content") }], expandedIDs: expanded).render(in: context)
+        case "AspectRatio": return AspectRatio(16.0 / 9.0) { Text("16:9") }.render(in: context)
+        default:
+            return Card { CardHeader { Text(entry.component) }; CardContent { Text("\(entry.category) · \(entry.states.joined(separator: ", "))") } }.render(in: context)
+        }
+    }
+}
