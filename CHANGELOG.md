@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `DragSession` with stable-ID pointer capture, target
+  negotiation, keyboard movement, scroll arbitration, and cancellation.
 - Experimental P3 `GridLayoutSolver` for deterministic fixed, fractional,
   minmax, spanning, constrained, and RTL grid geometry.
 - Release-gate artifacts: executable P0/P1/P2 catalog manifest, catalog tests, first-app and architecture docs, baseline procedure, 0.x release checklist, MIT licence, and dependency notice.
