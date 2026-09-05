@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `CommandRegistry`/`CommandPaletteEngine` contracts with
+  cancellable search, scoped shortcuts, stale-result protection, and safe ID execution.
 - Experimental P3 `MenubarModel`/`Menubar` contracts with hierarchical command
   state, keyboard navigation, shortcut conflict handling, and focus metadata.
 - Experimental P3 `SortableListModel`/`Sortable` contracts with stable-ID
