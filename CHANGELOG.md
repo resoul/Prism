@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `ChartModel`/`Chart` contracts for line/bar/pie data,
+  finite normalization, deterministic decimation, hit-testing, AX tables, and CSV export.
 - Experimental P3 `EventCalendarModel`/`EventCalendar` contracts with stable IDs,
   all-day separation, overlap columns, viewport filtering, and cancellable rescheduling.
 - Experimental P3 `CalendarLayout`/`CalendarView` contracts for deterministic
