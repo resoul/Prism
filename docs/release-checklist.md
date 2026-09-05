@@ -6,6 +6,8 @@ strict local and CI build gate.
 
 See [Release Scope and Evidence Audit](release-scope-audit.md) for the
 implemented/partial/unverified matrix and active release blockers.
+See [Fresh Consumer Release Sign-off](release-signoff.md) for the pinned
+consumer fixture and proposed `0.1.0` policy.
 See [Visual and Accessibility Baselines](visual-accessibility-baselines.md)
 for the deterministic contract matrix and host-level gaps.
 
