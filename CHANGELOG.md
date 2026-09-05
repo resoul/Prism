@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- `Examples/PrismShowcase`: shared Prism counter screen with separate iOS/iPadOS
+  and macOS application targets, UI-test bundles, and a repeatable local build
+  and test command.
 - Experimental P3 `GanttModel`/`Gantt` contracts with dependency cycle validation,
   zoom, cancellable rescheduling, bounded visible tasks, and AX table output.
 - Experimental P3 `KanbanModel`/`Kanban` contracts with stable card/column IDs,

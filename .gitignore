@@ -14,6 +14,11 @@ Packages/
 *.xcworkspace
 DerivedData/
 
+# The runnable showcase project is source, while Xcode's local build directory is not.
+!Examples/PrismShowcase/PrismShowcase.xcodeproj/
+!Examples/PrismShowcase/PrismShowcase.xcodeproj/**
+Examples/PrismShowcase/build/
+
 # OS & IDE artifacts
 .DS_Store
 .idea/
