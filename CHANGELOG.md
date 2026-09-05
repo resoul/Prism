@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `CalendarService` with injected clocks, non-Gregorian calendars,
+  locale/time-zone formatting, DST gap/fold handling, and calendar arithmetic.
 - Experimental P3 scoped `ClipboardStore` and `ScopedFileHandle` contracts with
   typed permission, revocation, close, and cancellation errors.
 - Experimental P3 `DragSession` with stable-ID pointer capture, target
