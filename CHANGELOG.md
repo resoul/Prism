@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `ResizableSplit`/`Resizable` contracts with bounded ratios,
+  RTL-aware keyboard resizing, nested composition, and cancellable capture.
 - Experimental P3 `FileUploadCoordinator` with bounded validation,
   cancellation/retry statuses, filename sanitization, and injected transport.
 - Experimental P3 `OTPDocument`/`InputOtp` contracts with bounded paste,
