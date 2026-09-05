@@ -1,5 +1,9 @@
 # 0.x Release Checklist
 
+
+See [Platform Build Verification](platform-build-verification.md) for the
+strict local and CI build gate.
+
 See [Release Scope and Evidence Audit](release-scope-audit.md) for the
 implemented/partial/unverified matrix and active release blockers.
 
