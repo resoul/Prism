@@ -3,6 +3,7 @@ import PrismUI
 
 /// Immutable state snapshot for the interactive showcase application.
 public struct ShowcaseState: Equatable, Sendable {
+    public var navigation: ShowcaseNavigationState
     public var count: Int
     public var inputText: String
     public var submittedText: String
@@ -12,6 +13,7 @@ public struct ShowcaseState: Equatable, Sendable {
     public var lastAction: String
 
     public init(
+        navigation: ShowcaseNavigationState = ShowcaseNavigationState(),
         count: Int = 0,
         inputText: String = "",
         submittedText: String = "",
@@ -20,6 +22,7 @@ public struct ShowcaseState: Equatable, Sendable {
         activeThemeID: ThemeID = .light,
         lastAction: String = "none"
     ) {
+        self.navigation = navigation
         self.count = count
         self.inputText = inputText
         self.submittedText = submittedText
@@ -77,6 +80,10 @@ public final class ShowcaseStore {
         (try? themeEnvironment.resolvedTheme()) ?? ShowcaseThemePresets.light
     }
 
+    public var currentRoute: ShowcaseRoute {
+        _state.navigation.currentRoute
+    }
+
     public convenience init(initialState: ShowcaseState? = nil) {
         self.init(initialState: initialState, preferences: ShowcasePreferences())
     }
@@ -99,11 +106,77 @@ public final class ShowcaseStore {
         if let explicitState = initialState {
             self._state = explicitState
         } else {
+            let args = ProcessInfo.processInfo.arguments
+            var initialRoute: ShowcaseRoute = .welcome
+            if let routeIdx = args.firstIndex(of: "-showcaseRoute"), routeIdx + 1 < args.count {
+                initialRoute = ShowcaseRoute.parse(path: args[routeIdx + 1])
+            }
             self._state = ShowcaseState(
+                navigation: ShowcaseNavigationState(initialRoute: initialRoute),
                 themeSelection: initialSelection,
                 activeThemeID: resolvedID
             )
         }
+    }
+
+    // MARK: - Navigation Actions
+
+    public func navigate(to route: ShowcaseRoute) {
+        guard route != _state.navigation.currentRoute else { return }
+        var s = _state
+        s.navigation.push(route: route)
+        s.lastAction = "navigate(\(route.pathString))"
+        update(s)
+    }
+
+    public func pop() {
+        var s = _state
+        if let popped = s.navigation.pop() {
+            s.lastAction = "pop(\(popped.pathString))"
+            update(s)
+        }
+    }
+
+    public func selectCategory(_ category: ShowcaseCategory) {
+        var s = _state
+        s.navigation.selectedCategory = category
+        s.navigation.push(route: .category(category))
+        s.lastAction = "selectCategory(\(category.rawValue))"
+        update(s)
+    }
+
+    public func selectComponent(_ id: String) {
+        var s = _state
+        s.navigation.selectedComponentID = id
+        if ShowcaseRegistry.item(for: id) != nil {
+            s.navigation.push(route: .component(id: id))
+        } else {
+            s.navigation.push(route: .notFound(id: id))
+        }
+        s.lastAction = "selectComponent(\(id))"
+        update(s)
+    }
+
+    public func setSearchQuery(_ query: String) {
+        var s = _state
+        s.navigation.setSearchQuery(query)
+        s.lastAction = "setSearchQuery(\(query))"
+        update(s)
+    }
+
+    public func clearSearch() {
+        var s = _state
+        s.navigation.clearSearch()
+        s.lastAction = "clearSearch"
+        update(s)
+    }
+
+    public func setContainerWidth(_ width: CGFloat) {
+        guard width > 0, width != _state.navigation.containerWidth else { return }
+        var s = _state
+        s.navigation.setContainerWidth(width)
+        s.lastAction = "setContainerWidth(\(Int(width)))"
+        update(s)
     }
 
     // MARK: - Actions
@@ -205,164 +278,32 @@ public final class ShowcaseStore {
         onChange?(rootElement())
     }
 
-    // MARK: - UI Construction
+    // MARK: - Bindings
 
-    public func rootElement() -> RenderElement {
-        let current = _state
-        let theme = activeTheme
-        let colors = theme.colors
+    public func searchBinding() -> Binding<String> {
+        Binding<String>(
+            get: { [weak self] in self?._state.navigation.searchQuery ?? "" },
+            set: { [weak self] newValue in self?.setSearchQuery(newValue) }
+        )
+    }
 
-        let inputBinding = Binding<String>(
+    public func inputBinding() -> Binding<String> {
+        Binding<String>(
             get: { [weak self] in self?._state.inputText ?? "" },
             set: { [weak self] newValue in self?.setInputText(newValue) }
         )
+    }
 
-        return VStack(alignment: .start, spacing: 16) {
-            // Header
-            HStack(spacing: 12) {
-                Text("Prism Showcase")
-                    .font(.heading)
-                    .foregroundColor(colors.foreground)
-                    .testID("showcase.title")
+    // MARK: - UI Construction
 
-                Text("Theme: \(current.activeThemeID.rawValue)")
-                    .font(.body)
-                    .foregroundColor(colors.mutedForeground)
-                    .testID("showcase.theme.status")
-            }
-
-            // Theme Switcher Fixture
-            VStack(alignment: .start, spacing: 8) {
-                Text("Theme Presets:")
-                    .font(.body)
-                    .foregroundColor(colors.foreground)
-                    .testID("showcase.theme.label")
-
-                HStack(spacing: 8) {
-                    Button("System") { [weak self] in
-                        self?.selectTheme(.system)
-                    }
-                    .testID("showcase.theme.system")
-                    .accessibilityLabel("Select system appearance")
-
-                    Button("Light") { [weak self] in
-                        self?.selectTheme(.light)
-                    }
-                    .testID("showcase.theme.light")
-                    .accessibilityLabel("Select light theme")
-
-                    Button("Dark") { [weak self] in
-                        self?.selectTheme(.dark)
-                    }
-                    .testID("showcase.theme.dark")
-                    .accessibilityLabel("Select dark theme")
-
-                    Button("Midnight") { [weak self] in
-                        self?.selectTheme(.midnight)
-                    }
-                    .testID("showcase.theme.midnight")
-                    .accessibilityLabel("Select midnight theme")
-
-                    Button("Forest") { [weak self] in
-                        self?.selectTheme(.forest)
-                    }
-                    .testID("showcase.theme.forest")
-                    .accessibilityLabel("Select forest theme")
-
-                    Button("Sand") { [weak self] in
-                        self?.selectTheme(.sand)
-                    }
-                    .testID("showcase.theme.sand")
-                    .accessibilityLabel("Select sand theme")
-                }
-            }
-
-            // Counter Fixture
-            HStack(spacing: 12) {
-                Text("Counter: \(current.count)")
-                    .foregroundColor(colors.foreground)
-                    .testID("showcase.counter")
-
-                Button("Increment") { [weak self] in
-                    self?.increment()
-                }
-                .testID("showcase.increment")
-                .accessibilityLabel("Increment counter")
-
-                Button("Decrement") { [weak self] in
-                    self?.decrement()
-                }
-                .testID("showcase.decrement")
-                .accessibilityLabel("Decrement counter")
-
-                Button("Reset") { [weak self] in
-                    self?.reset()
-                }
-                .testID("showcase.reset")
-                .accessibilityLabel("Reset counter")
-            }
-
-            // Input Fixture
-            VStack(alignment: .start, spacing: 8) {
-                Text("Input: \(current.inputText)")
-                    .foregroundColor(colors.foreground)
-                    .testID("showcase.input_display")
-
-                HStack(spacing: 8) {
-                    Input("Type something...", text: inputBinding)
-                        .testID("showcase.input")
-                        .accessibilityLabel("Showcase text input")
-
-                    Button("Submit") { [weak self] in
-                        self?.submitInput()
-                    }
-                    .testID("showcase.input_submit")
-                    .accessibilityLabel("Submit input text")
-                }
-
-                if !current.submittedText.isEmpty {
-                    Text("Submitted: \(current.submittedText)")
-                        .foregroundColor(colors.foreground)
-                        .testID("showcase.submitted_display")
-                }
-            }
-
-            // Scroll Fixture
-            VStack(alignment: .start, spacing: 8) {
-                HStack(spacing: 12) {
-                    Text("Scroll offset: \(Int(current.scrollOffset))")
-                        .foregroundColor(colors.foreground)
-                        .testID("showcase.scroll_status")
-
-                    Button("Scroll Down") { [weak self] in
-                        self?.scrollBy(20)
-                    }
-                    .testID("showcase.scroll_down")
-                    .accessibilityLabel("Scroll down")
-
-                    Button("Scroll Up") { [weak self] in
-                        self?.scrollBy(-20)
-                    }
-                    .testID("showcase.scroll_up")
-                    .accessibilityLabel("Scroll up")
-                }
-
-                ScrollArea(.vertical) {
-                    VStack(alignment: .start, spacing: 4) {
-                        for i in 1...20 {
-                            Text("Item \(i)")
-                                .foregroundColor(colors.foreground)
-                                .testID("showcase.scroll_item_\(i)")
-                        }
-                    }
-                }
-                .testID("showcase.scroll_area")
-                .height(100)
-            }
-        }
-        .padding(24)
-        .background(colors.background)
-        .render()
+    public func rootElement() -> RenderElement {
+        ShowcaseAdaptiveRootView(
+            state: _state,
+            theme: activeTheme,
+            searchBinding: searchBinding(),
+            inputBinding: inputBinding(),
+            store: self
+        ).render()
     }
 }
 

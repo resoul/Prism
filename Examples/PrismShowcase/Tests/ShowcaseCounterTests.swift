@@ -19,6 +19,7 @@ final class ShowcaseCounterTests: XCTestCase {
 
     func testCounterRootHasStableAutomationIDs() {
         let store = ShowcaseStore()
+        store.navigate(to: .component(id: "counter"))
         let root = store.rootElement()
         let tree = root.dumpTree()
 
@@ -119,6 +120,7 @@ final class ShowcaseCounterTests: XCTestCase {
 
     func testAccessibilityElementBridging() {
         let store = ShowcaseStore()
+        store.navigate(to: .component(id: "counter"))
         let engine = PrismHostEngine(rootElement: store.rootElement())
         let layer = CALayer()
         layer.bounds = CGRect(x: 0, y: 0, width: 400, height: 600)

@@ -34,6 +34,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
         let host = HostUIView(element: store.rootElement(), theme: store.activeTheme)
         host.accessibilityIdentifier = "showcase.host"
+        store.setContainerWidth(windowScene.screen.bounds.width)
+        host.onBoundsChange = { [weak store] bounds in
+            store?.setContainerWidth(bounds.width)
+        }
         store.onChange = { [weak host] element in host?.setRootElement(element) }
         store.onThemeChange = { [weak host] theme in host?.setTheme(theme) }
 

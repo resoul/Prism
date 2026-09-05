@@ -20,6 +20,9 @@ public enum Reconciler {
         case (.empty, .empty): return true
         case (.custom(let a), .custom(let b)): return a == b
         case (.portal(let a), .portal(let b)): return a == b
+        case (.textEditor, .textEditor): return true
+        case (.scrollArea, .scrollArea): return true
+        case (.image, .image): return true
         default: return false
         }
     }

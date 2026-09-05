@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the pinned fresh-consumer sign-off fixture and proposed `0.1.0`
   compatibility/migration policy; tagging and publishing remain owner actions.
 
+### Fixed
+- Fixed `Reconciler.isSameType` to recognize `.scrollArea`, `.textEditor`, and `.image` as
+  structurally compatible, preventing unnecessary subtree destruction and action unregistration
+  during reconciliation.
+
 ### Added
 - `Examples/PrismShowcase`: shared Prism showcase screen with separate iOS/iPadOS
   and macOS application targets, UI-test bundles, and a repeatable local build
@@ -21,6 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pointer capture and cancellation in `EventDispatcher`, native iOS and macOS accessibility
   element bridging (`UIAccessibilityElement`/`NSAccessibilityElement`), text input focus and
   iOS keyboard safe-area inset coordination, and Space/Return activation in `PrismHostEngine`.
+- Welcome Screen and Category Navigation (Task 23e): Welcome screen with Browse Components,
+  Theme Presets switcher, registry summary metrics; canonical 7-category navigation
+  (`Foundations`, `Data Display`, `Forms`, `Feedback & Overlays`, `Navigation`, `Layout & Collections`,
+  `Advanced Data`); responsive layout adapting between compact sequential navigation with back stack
+  and wide dual-pane split view (sidebar + detail); typed stable routes (`ShowcaseRoute`), rapid-tap
+  deduplication, live search query filtering with clear action, recoverable Not Found screen, deep-linking via
+  `-showcaseRoute <path>`, preservation of navigation context across theme updates and window resizing,
+  and 10 unit tests in `ShowcaseNavigationTests`.
 - Showcase Theme Presets and Live Appearance (Task 23d): Bundled Light, Dark, Midnight,
   Forest, and Sand theme presets in `PrismShowcase`, isolated `ShowcasePreferences` persistence
   with `-showcaseReset` support, live theme updating across `PrismHostEngine`, `HostUIView`, and
