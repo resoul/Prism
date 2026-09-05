@@ -235,3 +235,59 @@ public struct NativeSelect<Value: Hashable & Sendable>: Component {
     public func select(_ option: SelectionOption<Value>) { select.select(option) }
     public func body(context: ComponentContext) -> RenderElement { var element = select.body(context: context); element.props.custom["presentation"] = SelectPresentation.native.rawValue; return element }
 }
+
+/// Experimental searchable single-selection control. Hosts provide text input and key events.
+public struct Combobox<Value: Hashable & Sendable>: Component {
+    public let options: [SelectionOption<Value>]
+    public let selection: Binding<Value>
+    public var label: String?
+    public var placeholder: String
+    public var isDisabled: Bool
+    public private(set) var query: String
+    public private(set) var isExpanded: Bool
+    public private(set) var highlightedIndex: Int?
+
+    public init(_ label: String? = nil, selection: Binding<Value>, options: [SelectionOption<Value>], placeholder: String = "Search…", isDisabled: Bool = false) {
+        self.label = label; self.selection = selection; self.options = options; self.placeholder = placeholder; self.isDisabled = isDisabled
+        self.query = ""; self.isExpanded = false; self.highlightedIndex = nil
+    }
+
+    public var filteredOptions: [SelectionOption<Value>] {
+        guard !query.isEmpty else { return options }
+        return options.filter { $0.label.localizedCaseInsensitiveContains(query) }
+    }
+
+    /// Returns only the requested window, keeping rendering bounded for large choice sets.
+    public func visibleOptions(offset: Int, limit: Int) -> [SelectionOption<Value>] {
+        guard limit > 0 else { return [] }
+        let values = filteredOptions
+        let start = min(max(offset, 0), values.count)
+        return Array(values[start..<min(start + limit, values.count)])
+    }
+
+    public mutating func search(_ text: String) { query = text; highlightedIndex = firstEnabledIndex; isExpanded = true }
+    public mutating func open() { guard !isDisabled else { return }; isExpanded = true; highlightedIndex = highlightedIndex ?? firstEnabledIndex }
+    public mutating func cancel() { query = ""; isExpanded = false; highlightedIndex = nil }
+    public mutating func moveHighlight(by delta: Int) {
+        let enabled = filteredOptions.indices.filter { !filteredOptions[$0].isDisabled }
+        guard !enabled.isEmpty else { highlightedIndex = nil; return }
+        let current = enabled.firstIndex(of: highlightedIndex ?? enabled[0]) ?? 0
+        highlightedIndex = enabled[(current + delta + enabled.count) % enabled.count]
+    }
+    @discardableResult public mutating func commitHighlighted() -> Bool {
+        guard let index = highlightedIndex, filteredOptions.indices.contains(index) else { return false }
+        let option = filteredOptions[index]
+        guard !option.isDisabled, !isDisabled else { return false }
+        selection.setIfChanged(option.value); query = ""; isExpanded = false; highlightedIndex = nil; return true
+    }
+    public func select(_ option: SelectionOption<Value>) { guard !isDisabled, !option.isDisabled else { return }; selection.setIfChanged(option.value) }
+    private var firstEnabledIndex: Int? { filteredOptions.firstIndex { !$0.isDisabled } }
+
+    public func body(context: ComponentContext) -> RenderElement {
+        let selected = options.first { $0.value == selection.wrappedValue }?.label ?? placeholder
+        var element = HStack { Text(query.isEmpty ? selected : query); Text("⌄") }.render(in: context)
+        element.props.accessibilityLabel = label
+        element.props.custom = ["role": "comboBox", "value": selected, "query": query, "optionCount": String(filteredOptions.count), "isExpanded": isExpanded ? "true" : "false", "isDisabled": isDisabled ? "true" : "false", "highlightedIndex": highlightedIndex.map(String.init) ?? ""]
+        return element
+    }
+}
