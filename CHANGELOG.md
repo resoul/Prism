@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `Combobox` with searchable single selection, keyboard highlight,
+  disabled-option handling, cancellation, and bounded virtualized windows.
 - Experimental P3 `CalendarService` with injected clocks, non-Gregorian calendars,
   locale/time-zone formatting, DST gap/fold handling, and calendar arithmetic.
 - Experimental P3 scoped `ClipboardStore` and `ScopedFileHandle` contracts with
