@@ -1,5 +1,5 @@
 import Foundation
-import Flux
+@_exported import Flux
 import PrismLogging
 
 /// Core foundation module for Prism UI engine.

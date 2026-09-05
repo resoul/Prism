@@ -13,7 +13,20 @@ public final class EventDispatcher {
     private weak var lastPointerDownTarget: MountedNode?
     private var lastPointerDownLocation: CGPoint = .zero
 
+    /// Node capturing all subsequent pointer move/up events until released or cancelled.
+    public private(set) weak var pointerCaptureNode: MountedNode?
+
     public init() {}
+
+    /// Directs all subsequent pointer events to the specified mounted node.
+    public func setPointerCapture(_ node: MountedNode?) {
+        pointerCaptureNode = node
+    }
+
+    /// Releases any active pointer capture.
+    public func releasePointerCapture() {
+        pointerCaptureNode = nil
+    }
 
     /// Dispatches an event starting from the given target node.
     ///
@@ -100,6 +113,24 @@ public final class EventDispatcher {
         root: MountedNode,
         modifiers: EventModifiers = .none
     ) {
+        if let captured = pointerCaptureNode, captured.isMounted {
+            let localPoint = captured.convertToLocal(pointInHost: location)
+            let moveData = PointerEventData(
+                location: localPoint,
+                globalLocation: location,
+                button: .none,
+                pointerType: .mouse,
+                modifiers: modifiers
+            )
+            let moveEvent = Event(
+                type: .pointerMove,
+                targetID: captured.id,
+                payload: .pointer(moveData)
+            )
+            dispatch(event: moveEvent, target: captured)
+            return
+        }
+
         let hitTarget = HitTester.hitTest(point: location, root: root)
 
         // 1. Dispatch pointerMove to hit target
@@ -171,7 +202,9 @@ public final class EventDispatcher {
         modifiers: EventModifiers = .none,
         clickCount: Int = 1
     ) -> EventResult {
-        guard let target = HitTester.hitTest(point: location, root: root) else {
+        let hitTarget = HitTester.hitTest(point: location, root: root)
+        let target = (pointerCaptureNode?.isMounted == true ? pointerCaptureNode : nil) ?? hitTarget
+        guard let target else {
             lastPointerDownTarget = nil
             return .ignored
         }
@@ -201,8 +234,11 @@ public final class EventDispatcher {
         modifiers: EventModifiers = .none,
         clickCount: Int = 1
     ) -> EventResult {
-        guard let target = HitTester.hitTest(point: location, root: root) else {
+        let hitTarget = HitTester.hitTest(point: location, root: root)
+        let target = (pointerCaptureNode?.isMounted == true ? pointerCaptureNode : nil) ?? hitTarget
+        guard let target else {
             lastPointerDownTarget = nil
+            releasePointerCapture()
             return .ignored
         }
 
@@ -225,6 +261,7 @@ public final class EventDispatcher {
         }
 
         lastPointerDownTarget = nil
+        releasePointerCapture()
         return result
     }
 
@@ -232,5 +269,6 @@ public final class EventDispatcher {
     public func reset() {
         currentlyHoveredNode = nil
         lastPointerDownTarget = nil
+        pointerCaptureNode = nil
     }
 }

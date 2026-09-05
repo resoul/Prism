@@ -13,9 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
-- `Examples/PrismShowcase`: shared Prism counter screen with separate iOS/iPadOS
+- `Examples/PrismShowcase`: shared Prism showcase screen with separate iOS/iPadOS
   and macOS application targets, UI-test bundles, and a repeatable local build
   and test command.
+- Host State Input and Lifecycle Integration (Task 23c): MainActor UI store ownership,
+  Flux-backed deterministic state transitions, teardown subscription cancellation,
+  pointer capture and cancellation in `EventDispatcher`, native iOS and macOS accessibility
+  element bridging (`UIAccessibilityElement`/`NSAccessibilityElement`), text input focus and
+  iOS keyboard safe-area inset coordination, and Space/Return activation in `PrismHostEngine`.
 - Experimental P3 `GanttModel`/`Gantt` contracts with dependency cycle validation,
   zoom, cancellable rescheduling, bounded visible tasks, and AX table output.
 - Experimental P3 `KanbanModel`/`Kanban` contracts with stable card/column IDs,

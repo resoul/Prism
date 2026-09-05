@@ -139,9 +139,17 @@ public final class AccessibilityTree {
                     traits = AccessibilityTraits(rawValue: raw)
                 }
 
+                if props.custom["isButton"] == "true" {
+                    traits.insert(.button)
+                }
+                if case .text = node.element.kind {
+                    traits.insert(.staticText)
+                }
+
                 var actions: [AccessibilityAction] = []
-                // If node has tap handler or button trait, supply default activate action
-                if traits.contains(.button) || node.eventHandlers[.tap] != nil {
+                // If node has tap handler, button trait, or registered action, supply default activate action
+                let hasAction = traits.contains(.button) || node.eventHandlers[.tap] != nil || ActionRegistry.shared.action(for: node.id) != nil || (props.testID.flatMap { ActionRegistry.shared.action(forTestID: $0) } != nil)
+                if hasAction {
                     actions.append(.activate { [weak node] in
                         guard let node, node.isMounted else { return }
                         let tapEvent = Event(
@@ -149,7 +157,12 @@ public final class AccessibilityTree {
                             targetID: node.id,
                             payload: .pointer(PointerEventData(location: .zero, globalLocation: .zero))
                         )
-                        EventDispatcher().dispatch(event: tapEvent, target: node)
+                        let result = EventDispatcher().dispatch(event: tapEvent, target: node)
+                        if result != .handled {
+                            if let act = ActionRegistry.shared.action(for: node.id) ?? props.testID.flatMap({ ActionRegistry.shared.action(forTestID: $0) }) {
+                                act()
+                            }
+                        }
                     })
                 }
 

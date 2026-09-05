@@ -62,6 +62,7 @@ public final class MountedNode {
             targetSuperlayer.addSublayer(rootLayer)
         }
 
+        syncActionHandlers()
         effectScope.triggerAppear()
     }
 
@@ -76,7 +77,41 @@ public final class MountedNode {
                 targetSuperlayer.addSublayer(rootLayer)
             }
         }
+        syncActionHandlers()
         renderer.update(element: newElement, frame: frame, context: context)
+    }
+
+    /// Synchronizes actions from ActionRegistry and sets up built-in event handlers.
+    public func syncActionHandlers() {
+        eventHandlers[.tap] = nil
+        eventHandlers[.scroll] = nil
+
+        let action = ActionRegistry.shared.action(for: element.id)
+            ?? element.props.testID.flatMap { ActionRegistry.shared.action(forTestID: $0) }
+            ?? ActionRegistry.shared.action(for: id)
+        if let action {
+            addHandler(for: .tap) { event in
+                event.stopPropagation()
+                action()
+            }
+        }
+
+        if case .scrollArea(let axis) = element.kind {
+            addHandler(for: .scroll) { [weak self] event in
+                guard let self, let scrollData = event.scrollData else { return }
+                var currentX = Double(self.element.props.custom["scrollOffsetX"] ?? "0") ?? 0.0
+                var currentY = Double(self.element.props.custom["scrollOffsetY"] ?? "0") ?? 0.0
+                if axis == .vertical || axis == .both {
+                    currentY = max(0, currentY - scrollData.deltaY)
+                    self.element.props.custom["scrollOffsetY"] = "\(currentY)"
+                }
+                if axis == .horizontal || axis == .both {
+                    currentX = max(0, currentX - scrollData.deltaX)
+                    self.element.props.custom["scrollOffsetX"] = "\(currentX)"
+                }
+                self.renderer.update(element: self.element, frame: self.frame, context: RenderContext(scaleFactor: 2.0, colorScheme: .light))
+            }
+        }
     }
 
     /// Registers an event handler for this mounted node.
@@ -193,8 +228,12 @@ public final class MountedNode {
         subscriptionBag.cancelAll()
         updateCoalescer.cancel()
 
-        // 2. Purge local component state
+        // 2. Purge local component state and actions
         ComponentStateStore.shared.purge(for: id)
+        ActionRegistry.shared.unregister(for: id)
+        if let testID = element.props.testID {
+            ActionRegistry.shared.unregister(forTestID: testID)
+        }
 
         // 3. Unmount children recursively
         for child in children {

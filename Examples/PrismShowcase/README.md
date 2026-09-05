@@ -14,10 +14,9 @@ Run the repeatable check from the package root:
 ./scripts/check_examples.sh
 ```
 
-It runs the shared macOS logic test, then uses `build-for-testing` to build both app and UI-test bundles for macOS and an installed iOS simulator. Native UI automation is added in Task 23c.
+It runs the shared macOS logic tests (automation IDs, Flux state transitions, teardown cancellation, repeated leak-free mount cycles, and accessibility element bridging), then uses `build-for-testing` to build both app and UI-test bundles for macOS and an installed iOS simulator.
 Set `PRISM_IOS_DESTINATION` to override its destination, for example
 `platform=iOS Simulator,id=<UDID>`. Simulator builds are signing-free; use your
 own Apple development team only when deploying to a physical device.
 
-The initial UI test only proves both apps launch. Native Prism interaction and
-accessibility assertions are deliberately added by Task 23c.
+The showcase proves host redraw via Flux state transitions, touch panning/wheel scrolling, pointer capture/cancellation, text input focus and safe area adjustments, and native accessibility element bridging for labels and actions.

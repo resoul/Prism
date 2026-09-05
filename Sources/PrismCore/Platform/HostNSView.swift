@@ -125,6 +125,55 @@ public final class HostNSView: NSView, PrismHost {
         engine.accessibilityTree.findElement(byTestID: testID)
     }
 
+    // MARK: - Native NSAccessibility Bridge
+
+    public override func isAccessibilityElement() -> Bool { false }
+
+    public override func accessibilityChildren() -> [Any]? {
+        engine.accessibilityTree.elements.values.map { ax -> NSAccessibilityElement in
+            let elem = NSAccessibilityElement()
+            elem.setAccessibilityParent(self)
+            elem.setAccessibilityIdentifier(ax.testID ?? "")
+            elem.setAccessibilityLabel(ax.label ?? ax.testID ?? "")
+            if let val = ax.value {
+                elem.setAccessibilityValue(val)
+            }
+            if ax.traits.contains(.button) {
+                elem.setAccessibilityRole(.button)
+            } else {
+                elem.setAccessibilityRole(.staticText)
+            }
+            if let win = window {
+                let rectInWindow = convert(ax.frame, to: nil)
+                let rectOnScreen = win.convertToScreen(rectInWindow)
+                elem.setAccessibilityFrame(rectOnScreen)
+            } else {
+                elem.setAccessibilityFrame(ax.frame)
+            }
+            return elem
+        }
+    }
+
+    public override func accessibilityHitTest(_ point: NSPoint) -> Any? {
+        guard let win = window else { return self }
+        let windowPoint = win.convertPoint(fromScreen: point)
+        let localPoint = convert(windowPoint, from: nil)
+        for (_, ax) in engine.accessibilityTree.elements {
+            if ax.frame.contains(localPoint) {
+                let elem = NSAccessibilityElement()
+                elem.setAccessibilityParent(self)
+                elem.setAccessibilityIdentifier(ax.testID ?? "")
+                elem.setAccessibilityLabel(ax.label ?? ax.testID ?? "")
+                if let val = ax.value { elem.setAccessibilityValue(val) }
+                elem.setAccessibilityRole(ax.traits.contains(.button) ? .button : .staticText)
+                let rectInWindow = convert(ax.frame, to: nil)
+                elem.setAccessibilityFrame(win.convertToScreen(rectInWindow))
+                return elem
+            }
+        }
+        return super.accessibilityHitTest(point)
+    }
+
     // MARK: - Tracking Areas & Mouse Events
 
     private var trackingArea: NSTrackingArea?

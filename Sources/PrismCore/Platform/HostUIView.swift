@@ -44,6 +44,7 @@ public final class HostUIView: UIView, PrismHost {
     }
 
     public func teardown() {
+        NotificationCenter.default.removeObserver(self)
         onTeardown?()
         engine.teardown()
     }
@@ -93,9 +94,40 @@ public final class HostUIView: UIView, PrismHost {
             updateFromSystem()
             engine.render()
             onMount?()
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(keyboardWillChangeFrame(_:)),
+                name: UIResponder.keyboardWillChangeFrameNotification,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(keyboardWillHide(_:)),
+                name: UIResponder.keyboardWillHideNotification,
+                object: nil
+            )
         } else {
+            NotificationCenter.default.removeObserver(self)
             teardown()
         }
+    }
+
+    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let endFrameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
+              let window = self.window else { return }
+        let endFrame = window.convert(endFrameValue.cgRectValue, to: self)
+        let intersection = bounds.intersection(endFrame)
+        let keyboardHeight = intersection.isNull ? 0 : intersection.height
+        var insets = safeAreaDirectionalInsets
+        insets.bottom = max(insets.bottom, Double(keyboardHeight))
+        engine.safeAreaInsets = insets
+        engine.render()
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        engine.safeAreaInsets = safeAreaDirectionalInsets
+        engine.render()
     }
 
     public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -118,6 +150,37 @@ public final class HostUIView: UIView, PrismHost {
         engine.accessibilityTree.findElement(byTestID: testID)
     }
 
+    // MARK: - Native UIAccessibility Bridge
+
+    public override var isAccessibilityElement: Bool {
+        get { false }
+        set { }
+    }
+
+    public override var accessibilityElements: [Any]? {
+        get {
+            engine.accessibilityTree.elements.values.map { ax -> UIAccessibilityElement in
+                let elem = UIAccessibilityElement(accessibilityContainer: self)
+                elem.accessibilityIdentifier = ax.testID
+                elem.accessibilityLabel = ax.label ?? ax.testID
+                elem.accessibilityValue = ax.value
+                elem.accessibilityHint = ax.hint
+                elem.accessibilityFrameInContainerSpace = ax.frame
+                var traits: UIAccessibilityTraits = []
+                if ax.traits.contains(.button) { traits.insert(.button) }
+                if ax.traits.contains(.header) { traits.insert(.header) }
+                if ax.traits.contains(.selected) { traits.insert(.selected) }
+                if ax.traits.contains(.staticText) { traits.insert(.staticText) }
+                if ax.traits.contains(.searchField) { traits.insert(.searchField) }
+                elem.accessibilityTraits = traits
+                return elem
+            }
+        }
+        set { }
+    }
+
+    public override var canBecomeFirstResponder: Bool { true }
+
     // MARK: - Touch & Press Handling
 
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -138,6 +201,10 @@ public final class HostUIView: UIView, PrismHost {
         super.touchesMoved(touches, with: event)
         guard let touch = touches.first else { return }
         let loc = touch.location(in: self)
+        let prevLoc = touch.previousLocation(in: self)
+        let deltaX = Double(loc.x - prevLoc.x)
+        let deltaY = Double(loc.y - prevLoc.y)
+
         engine.dispatchPointerEvent(
             type: .pointerMove,
             location: loc,
@@ -146,6 +213,15 @@ public final class HostUIView: UIView, PrismHost {
             modifiers: .none,
             clickCount: touch.tapCount
         )
+
+        if abs(deltaX) > 0.5 || abs(deltaY) > 0.5 {
+            engine.dispatchScrollEvent(
+                location: loc,
+                deltaX: deltaX,
+                deltaY: deltaY,
+                phase: .changed
+            )
+        }
     }
 
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -160,11 +236,25 @@ public final class HostUIView: UIView, PrismHost {
             modifiers: .none,
             clickCount: touch.tapCount
         )
+        engine.dispatchScrollEvent(
+            location: loc,
+            deltaX: 0,
+            deltaY: 0,
+            phase: .ended
+        )
     }
 
     public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesCancelled(touches, with: event)
         engine.eventDispatcher.reset()
+        if let touch = touches.first {
+            engine.dispatchScrollEvent(
+                location: touch.location(in: self),
+                deltaX: 0,
+                deltaY: 0,
+                phase: .cancelled
+            )
+        }
     }
 
     public override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
@@ -216,6 +306,30 @@ public final class HostUIView: UIView, PrismHost {
         if flags.contains(.command) { mods.insert(.command) }
         if flags.contains(.alphaShift) { mods.insert(.capsLock) }
         return mods
+    }
+}
+
+extension HostUIView: UIKeyInput {
+    public var hasText: Bool {
+        !(PlatformTextInputAdapter.shared.activeDocument?.text.isEmpty ?? true)
+    }
+
+    public func insertText(_ text: String) {
+        if let doc = PlatformTextInputAdapter.shared.activeDocument {
+            doc.insert(text)
+        } else {
+            engine.dispatchKeyEvent(type: .keyDown, key: text, characters: text)
+            engine.dispatchKeyEvent(type: .keyUp, key: text, characters: text)
+        }
+    }
+
+    public func deleteBackward() {
+        if let doc = PlatformTextInputAdapter.shared.activeDocument {
+            doc.deleteBackward()
+        } else {
+            engine.dispatchKeyEvent(type: .keyDown, key: "\u{7F}", keyCode: 51)
+            engine.dispatchKeyEvent(type: .keyUp, key: "\u{7F}", keyCode: 51)
+        }
     }
 }
 #endif

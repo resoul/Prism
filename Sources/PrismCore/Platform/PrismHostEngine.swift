@@ -281,6 +281,28 @@ public final class PrismHostEngine {
             }
         }
 
+        // 3. Space / Return activation for focused button/interactive element
+        if type == .keyDown && (keyData.key == " " || keyData.key == "\r" || keyData.key == "\n" || keyData.keyCode == 49 || keyData.keyCode == 36) {
+            let hasTap = targetNode.eventHandlers[.tap] != nil
+                || ActionRegistry.shared.action(for: targetNode.id) != nil
+                || targetNode.element.props.testID.flatMap({ ActionRegistry.shared.action(forTestID: $0) }) != nil
+            if hasTap {
+                let tapEvent = Event(
+                    type: .tap,
+                    targetID: targetNode.id,
+                    payload: .pointer(PointerEventData(location: .zero, globalLocation: .zero))
+                )
+                let res = eventDispatcher.dispatch(event: tapEvent, target: targetNode)
+                if let act = ActionRegistry.shared.action(for: targetNode.id)
+                    ?? targetNode.element.props.testID.flatMap({ ActionRegistry.shared.action(forTestID: $0) }) {
+                    act()
+                }
+                event.preventDefault()
+                event.stopPropagation()
+                return res == .handled ? .handled : .handled
+            }
+        }
+
         return eventDispatcher.dispatch(event: event, target: targetNode)
     }
 
