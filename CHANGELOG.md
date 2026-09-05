@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `GanttModel`/`Gantt` contracts with dependency cycle validation,
+  zoom, cancellable rescheduling, bounded visible tasks, and AX table output.
 - Experimental P3 `KanbanModel`/`Kanban` contracts with stable card/column IDs,
   cross-column moves, cancellation, reconciliation, and bounded card windows.
 - Experimental P3 `ChartModel`/`Chart` contracts for line/bar/pie data,
