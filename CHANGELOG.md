@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 scoped `ClipboardStore` and `ScopedFileHandle` contracts with
+  typed permission, revocation, close, and cancellation errors.
 - Experimental P3 `DragSession` with stable-ID pointer capture, target
   negotiation, keyboard movement, scroll arbitration, and cancellation.
 - Experimental P3 `GridLayoutSolver` for deterministic fixed, fractional,
