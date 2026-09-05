@@ -21,7 +21,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
         let theme = Theme.fallbackDefault()
         let host = HostUIView(element: ManualLayoutTextScreen().render(in: ComponentContext(theme: theme)), theme: theme)
+        host.safeAreaPolicy = .all
         let window = UIWindow(windowScene: windowScene)
+        window.backgroundColor = .white
         window.rootViewController = UIViewController()
         window.rootViewController?.view = host
         self.window = window
