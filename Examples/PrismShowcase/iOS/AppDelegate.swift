@@ -32,9 +32,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
-        let host = HostUIView(element: store.rootElement())
+        let host = HostUIView(element: store.rootElement(), theme: store.activeTheme)
         host.accessibilityIdentifier = "showcase.host"
         store.onChange = { [weak host] element in host?.setRootElement(element) }
+        store.onThemeChange = { [weak host] theme in host?.setTheme(theme) }
 
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = ShowcaseViewController(host: host)

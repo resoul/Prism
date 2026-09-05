@@ -7,6 +7,8 @@ public struct ShowcaseState: Equatable, Sendable {
     public var inputText: String
     public var submittedText: String
     public var scrollOffset: Double
+    public var themeSelection: ThemeSelection
+    public var activeThemeID: ThemeID
     public var lastAction: String
 
     public init(
@@ -14,27 +16,34 @@ public struct ShowcaseState: Equatable, Sendable {
         inputText: String = "",
         submittedText: String = "",
         scrollOffset: Double = 0.0,
+        themeSelection: ThemeSelection = .system,
+        activeThemeID: ThemeID = .light,
         lastAction: String = "none"
     ) {
         self.count = count
         self.inputText = inputText
         self.submittedText = submittedText
         self.scrollOffset = scrollOffset
+        self.themeSelection = themeSelection
+        self.activeThemeID = activeThemeID
         self.lastAction = lastAction
     }
 }
 
 /// Flux-backed, MainActor-isolated state store driving the showcase screen.
 /// Implements deterministic state transitions, cancellation of subscriptions on teardown,
-/// and reactive root element publication without manual render calls.
+/// theme selection persistence, and reactive root element publication without manual render calls.
 @MainActor
 public final class ShowcaseStore {
     private var _state: ShowcaseState
+    private let preferences: ShowcasePreferences
+    private var themeEnvironment: ThemeEnvironment
     private let statePipe = Pipe<ShowcaseState>()
     private let bag = SubscriptionBag()
     private var isTornDown = false
 
     public var onChange: (@MainActor (RenderElement) -> Void)?
+    public var onThemeChange: (@MainActor (Theme) -> Void)?
 
     public var state: ShowcaseState {
         _state
@@ -56,8 +65,45 @@ public final class ShowcaseStore {
         _state.scrollOffset
     }
 
-    public init(initialState: ShowcaseState = ShowcaseState()) {
-        self._state = initialState
+    public var themeSelection: ThemeSelection {
+        _state.themeSelection
+    }
+
+    public var activeThemeID: ThemeID {
+        _state.activeThemeID
+    }
+
+    public var activeTheme: Theme {
+        (try? themeEnvironment.resolvedTheme()) ?? ShowcaseThemePresets.light
+    }
+
+    public convenience init(initialState: ShowcaseState? = nil) {
+        self.init(initialState: initialState, preferences: ShowcasePreferences())
+    }
+
+    public init(
+        initialState: ShowcaseState?,
+        preferences: ShowcasePreferences
+    ) {
+        self.preferences = preferences
+        let config = ShowcaseConfig.bundled
+        let initialSelection = initialState?.themeSelection ?? preferences.themeSelection
+        let env = ThemeEnvironment(
+            config: config,
+            selection: initialSelection,
+            currentSystemScheme: .light
+        )
+        self.themeEnvironment = env
+        let resolvedID = (try? env.resolvedTheme().id) ?? .light
+
+        if let explicitState = initialState {
+            self._state = explicitState
+        } else {
+            self._state = ShowcaseState(
+                themeSelection: initialSelection,
+                activeThemeID: resolvedID
+            )
+        }
     }
 
     // MARK: - Actions
@@ -77,7 +123,38 @@ public final class ShowcaseStore {
     }
 
     public func reset() {
-        update(ShowcaseState())
+        preferences.reset()
+        themeEnvironment.selection = .system
+        let resolvedID = (try? themeEnvironment.resolvedTheme().id) ?? .light
+        let s = ShowcaseState(
+            themeSelection: .system,
+            activeThemeID: resolvedID,
+            lastAction: "reset"
+        )
+        update(s)
+        onThemeChange?(activeTheme)
+    }
+
+    public func selectTheme(_ selection: ThemeSelection) {
+        preferences.themeSelection = selection
+        themeEnvironment.selection = selection
+        var s = _state
+        s.themeSelection = selection
+        s.activeThemeID = activeTheme.id
+        s.lastAction = "selectTheme"
+        update(s)
+        onThemeChange?(activeTheme)
+    }
+
+    public func setSystemColorScheme(_ scheme: ColorScheme) {
+        themeEnvironment.currentSystemScheme = scheme
+        if _state.themeSelection == .system {
+            var s = _state
+            s.activeThemeID = activeTheme.id
+            s.lastAction = "setSystemColorScheme(\(scheme.rawValue))"
+            update(s)
+            onThemeChange?(activeTheme)
+        }
     }
 
     public func setInputText(_ text: String) {
@@ -113,6 +190,7 @@ public final class ShowcaseStore {
         statePipe.finish()
         bag.cancelAll()
         onChange = nil
+        onThemeChange = nil
     }
 
     private func update(_ newState: ShowcaseState) {
@@ -131,6 +209,8 @@ public final class ShowcaseStore {
 
     public func rootElement() -> RenderElement {
         let current = _state
+        let theme = activeTheme
+        let colors = theme.colors
 
         let inputBinding = Binding<String>(
             get: { [weak self] in self?._state.inputText ?? "" },
@@ -139,13 +219,68 @@ public final class ShowcaseStore {
 
         return VStack(alignment: .start, spacing: 16) {
             // Header
-            Text("Prism Showcase")
-                .font(.heading)
-                .testID("showcase.title")
+            HStack(spacing: 12) {
+                Text("Prism Showcase")
+                    .font(.heading)
+                    .foregroundColor(colors.foreground)
+                    .testID("showcase.title")
+
+                Text("Theme: \(current.activeThemeID.rawValue)")
+                    .font(.body)
+                    .foregroundColor(colors.mutedForeground)
+                    .testID("showcase.theme.status")
+            }
+
+            // Theme Switcher Fixture
+            VStack(alignment: .start, spacing: 8) {
+                Text("Theme Presets:")
+                    .font(.body)
+                    .foregroundColor(colors.foreground)
+                    .testID("showcase.theme.label")
+
+                HStack(spacing: 8) {
+                    Button("System") { [weak self] in
+                        self?.selectTheme(.system)
+                    }
+                    .testID("showcase.theme.system")
+                    .accessibilityLabel("Select system appearance")
+
+                    Button("Light") { [weak self] in
+                        self?.selectTheme(.light)
+                    }
+                    .testID("showcase.theme.light")
+                    .accessibilityLabel("Select light theme")
+
+                    Button("Dark") { [weak self] in
+                        self?.selectTheme(.dark)
+                    }
+                    .testID("showcase.theme.dark")
+                    .accessibilityLabel("Select dark theme")
+
+                    Button("Midnight") { [weak self] in
+                        self?.selectTheme(.midnight)
+                    }
+                    .testID("showcase.theme.midnight")
+                    .accessibilityLabel("Select midnight theme")
+
+                    Button("Forest") { [weak self] in
+                        self?.selectTheme(.forest)
+                    }
+                    .testID("showcase.theme.forest")
+                    .accessibilityLabel("Select forest theme")
+
+                    Button("Sand") { [weak self] in
+                        self?.selectTheme(.sand)
+                    }
+                    .testID("showcase.theme.sand")
+                    .accessibilityLabel("Select sand theme")
+                }
+            }
 
             // Counter Fixture
             HStack(spacing: 12) {
                 Text("Counter: \(current.count)")
+                    .foregroundColor(colors.foreground)
                     .testID("showcase.counter")
 
                 Button("Increment") { [weak self] in
@@ -170,6 +305,7 @@ public final class ShowcaseStore {
             // Input Fixture
             VStack(alignment: .start, spacing: 8) {
                 Text("Input: \(current.inputText)")
+                    .foregroundColor(colors.foreground)
                     .testID("showcase.input_display")
 
                 HStack(spacing: 8) {
@@ -186,6 +322,7 @@ public final class ShowcaseStore {
 
                 if !current.submittedText.isEmpty {
                     Text("Submitted: \(current.submittedText)")
+                        .foregroundColor(colors.foreground)
                         .testID("showcase.submitted_display")
                 }
             }
@@ -194,6 +331,7 @@ public final class ShowcaseStore {
             VStack(alignment: .start, spacing: 8) {
                 HStack(spacing: 12) {
                     Text("Scroll offset: \(Int(current.scrollOffset))")
+                        .foregroundColor(colors.foreground)
                         .testID("showcase.scroll_status")
 
                     Button("Scroll Down") { [weak self] in
@@ -213,6 +351,7 @@ public final class ShowcaseStore {
                     VStack(alignment: .start, spacing: 4) {
                         for i in 1...20 {
                             Text("Item \(i)")
+                                .foregroundColor(colors.foreground)
                                 .testID("showcase.scroll_item_\(i)")
                         }
                     }
@@ -222,6 +361,7 @@ public final class ShowcaseStore {
             }
         }
         .padding(24)
+        .background(colors.background)
         .render()
     }
 }

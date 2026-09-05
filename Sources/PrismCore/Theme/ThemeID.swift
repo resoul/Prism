@@ -24,6 +24,8 @@ public struct ThemeID: Hashable, Equatable, Sendable, ExpressibleByStringLiteral
     public static let light = ThemeID("light")
     public static let dark = ThemeID("dark")
     public static let midnight = ThemeID("midnight")
+    public static let forest = ThemeID("forest")
+    public static let sand = ThemeID("sand")
 
     // MARK: - Factory for custom themes
     public static func brand(_ name: String) -> ThemeID {

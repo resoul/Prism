@@ -12,9 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             store.reset()
         }
 
-        let host = HostNSView(element: store.rootElement())
+        let host = HostNSView(element: store.rootElement(), theme: store.activeTheme)
         host.setAccessibilityIdentifier("showcase.host")
         store.onChange = { [weak host] element in host?.setRootElement(element) }
+        store.onThemeChange = { [weak host] theme in host?.setTheme(theme) }
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 800, height: 560),
