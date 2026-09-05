@@ -6,6 +6,8 @@ strict local and CI build gate.
 
 See [Release Scope and Evidence Audit](release-scope-audit.md) for the
 implemented/partial/unverified matrix and active release blockers.
+See [Visual and Accessibility Baselines](visual-accessibility-baselines.md)
+for the deterministic contract matrix and host-level gaps.
 
 - [ ] `swift test` and `./scripts/check_build.sh` pass from a clean checkout.
 - [ ] Build iOS, iPadOS, macOS, and tvOS targets; record unavailable environments rather than treating them as passed.
