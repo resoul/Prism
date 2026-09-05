@@ -28,6 +28,10 @@
 		A10000000000000000000025 /* ShowcaseScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* ShowcaseScreens.swift */; };
 		A10000000000000000000026 /* ShowcaseScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* ShowcaseScreens.swift */; };
 		A10000000000000000000027 /* ShowcaseNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000023 /* ShowcaseNavigationTests.swift */; };
+		A10000000000000000000028 /* ShowcaseExampleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* ShowcaseExampleStore.swift */; };
+		A10000000000000000000029 /* ShowcaseExampleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* ShowcaseExampleStore.swift */; };
+		A10000000000000000000030 /* ShowcaseExampleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* ShowcaseExampleStore.swift */; };
+		A10000000000000000000031 /* ShowcaseRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000025 /* ShowcaseRegistryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +50,8 @@
 		A20000000000000000000021 /* ShowcaseNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseNavigation.swift; sourceTree = "<group>"; };
 		A20000000000000000000022 /* ShowcaseScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseScreens.swift; sourceTree = "<group>"; };
 		A20000000000000000000023 /* ShowcaseNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseNavigationTests.swift; sourceTree = "<group>"; };
+		A20000000000000000000024 /* ShowcaseExampleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseExampleStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000025 /* ShowcaseRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseRegistryTests.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* PrismShowcase-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PrismShowcase-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000006 /* PrismShowcase-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PrismShowcase-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000007 /* PrismShowcase-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PrismShowcase-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -63,11 +69,11 @@
 
 /* Begin PBXGroup section */
 		A60000000000000000000001 = {isa = PBXGroup; children = (A60000000000000000000002 /* Shared */, A60000000000000000000003 /* iOS */, A60000000000000000000004 /* macOS */, A60000000000000000000005 /* UITests */, A60000000000000000000007 /* Tests */, A60000000000000000000006 /* Products */,); sourceTree = "<group>"; };
-		A60000000000000000000002 = {isa = PBXGroup; children = (A20000000000000000000001 /* ShowcaseCounter.swift */, A20000000000000000000011 /* ShowcaseThemePresets.swift */, A20000000000000000000021 /* ShowcaseNavigation.swift */, A20000000000000000000022 /* ShowcaseScreens.swift */,); path = Shared; sourceTree = "<group>"; };
+		A60000000000000000000002 = {isa = PBXGroup; children = (A20000000000000000000001 /* ShowcaseCounter.swift */, A20000000000000000000011 /* ShowcaseThemePresets.swift */, A20000000000000000000021 /* ShowcaseNavigation.swift */, A20000000000000000000022 /* ShowcaseScreens.swift */, A20000000000000000000024 /* ShowcaseExampleStore.swift */,); path = Shared; sourceTree = "<group>"; };
 		A60000000000000000000003 = {isa = PBXGroup; children = (A20000000000000000000002 /* iOS AppDelegate.swift */,); path = iOS; sourceTree = "<group>"; };
 		A60000000000000000000004 = {isa = PBXGroup; children = (A20000000000000000000003 /* macOS AppDelegate.swift */,); path = macOS; sourceTree = "<group>"; };
 		A60000000000000000000005 = {isa = PBXGroup; children = (A20000000000000000000004 /* ShowcaseLaunchUITests.swift */,); path = UITests; sourceTree = "<group>"; };
-		A60000000000000000000007 = {isa = PBXGroup; children = (A20000000000000000000009 /* ShowcaseCounterTests.swift */, A20000000000000000000012 /* ShowcaseThemeTests.swift */, A20000000000000000000023 /* ShowcaseNavigationTests.swift */,); path = Tests; sourceTree = "<group>"; };
+		A60000000000000000000007 = {isa = PBXGroup; children = (A20000000000000000000009 /* ShowcaseCounterTests.swift */, A20000000000000000000012 /* ShowcaseThemeTests.swift */, A20000000000000000000023 /* ShowcaseNavigationTests.swift */, A20000000000000000000025 /* ShowcaseRegistryTests.swift */,); path = Tests; sourceTree = "<group>"; };
 		A60000000000000000000006 = {isa = PBXGroup; children = (A20000000000000000000005 /* PrismShowcase-iOS.app */, A20000000000000000000006 /* PrismShowcase-macOS.app */, A20000000000000000000007 /* PrismShowcase-iOSUITests.xctest */, A20000000000000000000008 /* PrismShowcase-macOSUITests.xctest */, A20000000000000000000010 /* PrismShowcase-macOSTests.xctest */,); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -87,11 +93,11 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A11000000000000000000001 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* ShowcaseCounter.swift in Sources */, A10000000000000000000012 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000021 /* ShowcaseNavigation.swift in Sources */, A10000000000000000000024 /* ShowcaseScreens.swift in Sources */, A10000000000000000000002 /* iOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
-		A11000000000000000000002 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000004 /* ShowcaseCounter.swift in Sources */, A10000000000000000000013 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000022 /* ShowcaseNavigation.swift in Sources */, A10000000000000000000025 /* ShowcaseScreens.swift in Sources */, A10000000000000000000005 /* macOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A11000000000000000000001 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* ShowcaseCounter.swift in Sources */, A10000000000000000000012 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000021 /* ShowcaseNavigation.swift in Sources */, A10000000000000000000024 /* ShowcaseScreens.swift in Sources */, A10000000000000000000028 /* ShowcaseExampleStore.swift in Sources */, A10000000000000000000002 /* iOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A11000000000000000000002 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000004 /* ShowcaseCounter.swift in Sources */, A10000000000000000000013 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000022 /* ShowcaseNavigation.swift in Sources */, A10000000000000000000025 /* ShowcaseScreens.swift in Sources */, A10000000000000000000029 /* ShowcaseExampleStore.swift in Sources */, A10000000000000000000005 /* macOS AppDelegate.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 		A11000000000000000000003 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000007 /* iOS UI tests in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 		A11000000000000000000004 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000008 /* macOS UI tests in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
-		A11000000000000000000005 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000009 /* ShowcaseCounter.swift in Sources */, A10000000000000000000014 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000023 /* ShowcaseNavigation.swift in Sources */, A10000000000000000000026 /* ShowcaseScreens.swift in Sources */, A10000000000000000000010 /* ShowcaseCounterTests.swift in Sources */, A10000000000000000000015 /* ShowcaseThemeTests.swift in Sources */, A10000000000000000000027 /* ShowcaseNavigationTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A11000000000000000000005 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000009 /* ShowcaseCounter.swift in Sources */, A10000000000000000000014 /* ShowcaseThemePresets.swift in Sources */, A10000000000000000000023 /* ShowcaseNavigation.swift in Sources */, A10000000000000000000026 /* ShowcaseScreens.swift in Sources */, A10000000000000000000030 /* ShowcaseExampleStore.swift in Sources */, A10000000000000000000010 /* ShowcaseCounterTests.swift in Sources */, A10000000000000000000015 /* ShowcaseThemeTests.swift in Sources */, A10000000000000000000027 /* ShowcaseNavigationTests.swift in Sources */, A10000000000000000000031 /* ShowcaseRegistryTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */

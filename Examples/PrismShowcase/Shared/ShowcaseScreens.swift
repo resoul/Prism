@@ -725,42 +725,156 @@ public struct ShowcaseDetailScreen: Component {
     }
 
     public func body(context: ComponentContext) -> RenderElement {
-        let colors = theme.colors
-        let current = state
+        MainActor.assumeIsolated {
+            let colors = theme.colors
+            let current = state
+            let exampleStore = store?.exampleStore(for: item.id)
 
-        return ScrollArea(.vertical) {
-            VStack(alignment: .start, spacing: 20) {
-                // Header with Back and Title
-                HStack(spacing: 12) {
-                    Button("← Back") { [weak store] in
-                        store?.pop()
+            return ScrollArea(.vertical) {
+                VStack(alignment: .stretch, spacing: 20) {
+                    // Header with Back, Title, Category and Reset
+                    HStack(spacing: 12) {
+                        Button("← Back") { [weak store] in
+                            store?.pop()
+                        }
+                        .testID("showcase.navigation.back")
+                        .accessibilityLabel("Back to list")
+
+                        Text(item.name)
+                            .font(.heading)
+                            .foregroundColor(colors.foreground)
+                            .testID("showcase.detail.title")
+
+                        Text("[\(item.category.title)]")
+                            .font(.mono)
+                            .foregroundColor(colors.mutedForeground)
+                            .testID("showcase.detail.category")
+
+                        Spacer()
+
+                        Button("Reset") { [weak store, weak exampleStore] in
+                            if item.id == "counter" {
+                                store?.reset()
+                            }
+                            exampleStore?.reset()
+                        }
+                        .testID("showcase.detail.reset")
+                        .accessibilityLabel("Reset scenario state")
                     }
-                    .testID("showcase.navigation.back")
-                    .accessibilityLabel("Back to list")
 
-                    Text(item.name)
-                        .font(.heading)
-                        .foregroundColor(colors.foreground)
-                        .testID("showcase.detail.title")
-
-                    Text("[\(item.category.title)]")
-                        .font(.mono)
+                    Text(item.summary)
+                        .font(.body)
                         .foregroundColor(colors.mutedForeground)
-                        .testID("showcase.detail.category")
+                        .testID("showcase.detail.summary")
 
-                    Spacer()
+                    // Unified Descriptor Metadata Badges
+                    HStack(spacing: 12) {
+                        VStack(alignment: .start, spacing: 2) {
+                            Text("Symbol:")
+                                .font(.mono)
+                                .foregroundColor(colors.mutedForeground)
+                            Text(item.publicSymbol)
+                                .font(.mono)
+                                .foregroundColor(colors.foreground)
+                                .testID("showcase.detail.symbol")
+                        }
 
-                    Button("Reset") { [weak store] in
-                        store?.reset()
+                        VStack(alignment: .start, spacing: 2) {
+                            Text("Maturity:")
+                                .font(.mono)
+                                .foregroundColor(colors.mutedForeground)
+                            Text(item.maturity.rawValue)
+                                .font(.mono)
+                                .foregroundColor(colors.foreground)
+                                .testID("showcase.detail.maturity")
+                        }
+
+                        VStack(alignment: .start, spacing: 2) {
+                            Text("Capabilities:")
+                                .font(.mono)
+                                .foregroundColor(colors.mutedForeground)
+                            Text(item.capabilities.summary)
+                                .font(.mono)
+                                .foregroundColor(colors.foreground)
+                                .testID("showcase.detail.capabilities")
+                        }
+
+                        VStack(alignment: .start, spacing: 2) {
+                            Text("Source:")
+                                .font(.mono)
+                                .foregroundColor(colors.mutedForeground)
+                            Text(item.documentationPath)
+                                .font(.mono)
+                                .foregroundColor(colors.foreground)
+                                .testID("showcase.detail.doc_path")
+                        }
                     }
-                    .testID("showcase.detail.reset")
+                    .padding(12)
+                    .background(colors.muted)
+
+                    Divider()
+
+                // Explicit Incomplete Status Banner (Eliminates silent generic fallback)
+                if case .incomplete(let owner, let gap) = item.status {
+                    VStack(alignment: .start, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Text("⚠️ Incomplete Implementation")
+                                .font(.heading)
+                                .foregroundColor(colors.destructive)
+                                .testID("showcase.detail.incomplete_title")
+
+                            Spacer()
+
+                            Text("Owner: \(owner)")
+                                .font(.mono)
+                                .foregroundColor(colors.mutedForeground)
+                                .testID("showcase.detail.incomplete_owner")
+                        }
+
+                        Text("Reproducible gap: \(gap)")
+                            .font(.body)
+                            .foregroundColor(colors.mutedForeground)
+                            .testID("showcase.detail.incomplete_gap")
+                    }
+                    .padding(14)
+                    .background(colors.muted)
+                    .testID("showcase.detail.incomplete")
                 }
 
-                Text(item.summary)
-                    .font(.body)
-                    .foregroundColor(colors.mutedForeground)
+                // Interactive Controls (States & Variants)
+                if let exStore = exampleStore {
+                    VStack(alignment: .start, spacing: 12) {
+                        if !item.states.isEmpty {
+                            HStack(spacing: 8) {
+                                Text("State:")
+                                    .font(.mono)
+                                    .foregroundColor(colors.mutedForeground)
 
-                Divider()
+                                for stateName in item.states {
+                                    Button(stateName) { [weak exStore] in
+                                        exStore?.setState(stateName)
+                                    }
+                                    .testID("showcase.detail.state.\(stateName)")
+                                }
+                            }
+                        }
+
+                        if !item.availableVariants.isEmpty {
+                            HStack(spacing: 8) {
+                                Text("Variant:")
+                                    .font(.mono)
+                                    .foregroundColor(colors.mutedForeground)
+
+                                for variantName in item.availableVariants {
+                                    Button(variantName) { [weak exStore] in
+                                        exStore?.setVariant(variantName)
+                                    }
+                                    .testID("showcase.detail.variant.\(variantName)")
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Special Case: "counter" fixture (prototype interactive tests)
                 if item.id == "counter" {
@@ -847,49 +961,163 @@ public struct ShowcaseDetailScreen: Component {
                         .height(100)
                     }
                 } else {
-                    // Standard Component Playground Container
+                    // Standard Component Playground Live Preview Container
                     VStack(alignment: .stretch, spacing: 16) {
                         Text("Live Component Preview:")
                             .font(.body)
                             .foregroundColor(colors.mutedForeground)
 
-                        // Render real component preview
+                        // Render live interactive preview
                         VStack(alignment: .center, spacing: 12) {
                             switch item.id {
+                            case "accordion":
+                                VStack(alignment: .stretch, spacing: 12) {
+                                    HStack(spacing: 8) {
+                                        Button("Toggle Item 1") { [weak exampleStore] in
+                                            exampleStore?.toggleExpanded("item-1")
+                                        }
+                                        .testID("showcase.accordion.toggle_1")
+
+                                        Button("Toggle Item 2") { [weak exampleStore] in
+                                            exampleStore?.toggleExpanded("item-2")
+                                        }
+                                        .testID("showcase.accordion.toggle_2")
+                                    }
+
+                                    Accordion(
+                                        items: [
+                                            AccordionItem(id: "item-1", title: "Architecture & Fundamentals") {
+                                                Text("Prism is a layer-backed retained component architecture.")
+                                                    .foregroundColor(colors.foreground)
+                                            },
+                                            AccordionItem(id: "item-2", title: "Styling & Semantic Design Tokens") {
+                                                Text("Tokens provide semantic colors, spacing, and typography across themes.")
+                                                    .foregroundColor(colors.foreground)
+                                            }
+                                        ],
+                                        mode: .multiple,
+                                        expandedIDs: (exampleStore ?? ShowcaseExampleStore(componentID: "accordion")).expandedBinding()
+                                    )
+                                    .testID("showcase.preview.accordion")
+                                }
+
                             case "button":
                                 HStack(spacing: 12) {
-                                    Button("Primary Action") { [weak store] in store?.increment() }
-                                        .testID("showcase.preview.button_primary")
-                                    Button("Secondary Action") { }
+                                    Button("Primary Action (\(exampleStore?.state.localCount ?? 0))") { [weak exampleStore] in
+                                        exampleStore?.increment()
+                                    }
+                                    .testID("showcase.preview.button_primary")
+
+                                    Button("Secondary Action") { [weak exampleStore] in
+                                        exampleStore?.triggerAction("secondary_action")
+                                    }
+                                    .testID("showcase.preview.button_secondary")
                                 }
+
                             case "badge":
                                 HStack(spacing: 8) {
-                                    Badge("Active").testID("showcase.preview.badge")
-                                    Badge("Pending")
+                                    Badge(exampleStore?.state.selectedVariant.capitalized ?? "Default")
+                                        .testID("showcase.preview.badge")
+                                    Badge("State: \(exampleStore?.state.selectedState ?? "default")")
                                 }
+
                             case "card":
                                 Card {
-                                    CardHeader { Text("Card Header") }
-                                    CardContent { Text("Interactive showcase card body.") }
+                                    CardHeader { Text("Card Header (\(exampleStore?.state.selectedVariant ?? "default"))") }
+                                    CardContent { Text("Interactive showcase card body. State: \(exampleStore?.state.selectedState ?? "default")") }
+                                    CardFooter {
+                                        Button("Increment (\(exampleStore?.state.localCount ?? 0))") { [weak exampleStore] in
+                                            exampleStore?.increment()
+                                        }
+                                    }
                                 }
                                 .testID("showcase.preview.card")
+
                             case "alert":
-                                Alert(title: "Showcase Notice", description: "Demonstrating Alert component.")
-                                    .testID("showcase.preview.alert")
-                            default:
+                                Alert(
+                                    title: "Showcase Notice [\(exampleStore?.state.selectedVariant ?? "default")]",
+                                    description: "Demonstrating Alert component under state: \(exampleStore?.state.selectedState ?? "default")."
+                                )
+                                .testID("showcase.preview.alert")
+
+                            case "checkbox":
+                                HStack(spacing: 12) {
+                                    Checkbox("Enable Option", isOn: (exampleStore ?? ShowcaseExampleStore(componentID: "checkbox")).boolBinding())
+                                        .testID("showcase.preview.checkbox")
+
+                                    Button("Toggle") { [weak exampleStore] in
+                                        exampleStore?.setBool(!(exampleStore?.state.localBool ?? false))
+                                    }
+                                    .testID("showcase.preview.checkbox_toggle")
+                                }
+
+                            case "switch":
+                                HStack(spacing: 12) {
+                                    Switch("Active Switch", isOn: (exampleStore ?? ShowcaseExampleStore(componentID: "switch")).boolBinding())
+                                        .testID("showcase.preview.switch")
+
+                                    Button("Toggle") { [weak exampleStore] in
+                                        exampleStore?.setBool(!(exampleStore?.state.localBool ?? false))
+                                    }
+                                    .testID("showcase.preview.switch_toggle")
+                                }
+
+                            case "slider":
                                 VStack(alignment: .start, spacing: 8) {
-                                    Text("\(item.name) Preview")
-                                        .font(.heading)
+                                    Text("Slider Value: \(String(format: "%.2f", exampleStore?.state.localDouble ?? 0.5))")
                                         .foregroundColor(colors.foreground)
-                                    Text("Category: \(item.category.title)")
+                                    Slider(
+                                        value: (exampleStore ?? ShowcaseExampleStore(componentID: "slider")).doubleBinding(),
+                                        in: 0...1,
+                                        step: 0.05,
+                                        label: "Volume"
+                                    )
+                                    .testID("showcase.preview.slider")
+
+                                    HStack(spacing: 8) {
+                                        Button("+0.1") { [weak exampleStore] in
+                                            let val = min(1.0, (exampleStore?.state.localDouble ?? 0) + 0.1)
+                                            exampleStore?.setDouble(val)
+                                        }
+                                        .testID("showcase.preview.slider_plus")
+
+                                        Button("-0.1") { [weak exampleStore] in
+                                            let val = max(0.0, (exampleStore?.state.localDouble ?? 0) - 0.1)
+                                            exampleStore?.setDouble(val)
+                                        }
+                                        .testID("showcase.preview.slider_minus")
+                                    }
+                                }
+
+                            case "input":
+                                VStack(alignment: .start, spacing: 8) {
+                                    Input("Type text...", text: (exampleStore ?? ShowcaseExampleStore(componentID: "input")).textBinding())
+                                        .testID("showcase.preview.input")
+
+                                    Text("Current Input: \(exampleStore?.state.localText ?? "")")
                                         .font(.mono)
                                         .foregroundColor(colors.mutedForeground)
-                                    Text("States: \(item.states.joined(separator: ", "))")
-                                        .font(.body)
+                                        .testID("showcase.preview.input_echo")
+                                }
+
+                            default:
+                                VStack(alignment: .start, spacing: 8) {
+                                    Text("\(item.name) Interactive Descriptor")
+                                        .font(.heading)
+                                        .foregroundColor(colors.foreground)
+                                    Text("Category: \(item.category.title) | Symbol: \(item.publicSymbol)")
+                                        .font(.mono)
                                         .foregroundColor(colors.mutedForeground)
+                                    Text("Maturity: \(item.maturity.rawValue) | Platform: \(item.capabilities.summary)")
+                                        .font(.mono)
+                                        .foregroundColor(colors.mutedForeground)
+                                    Text("State: \(exampleStore?.state.selectedState ?? "default") | Variant: \(exampleStore?.state.selectedVariant ?? "default")")
+                                        .font(.body)
+                                        .foregroundColor(colors.foreground)
                                 }
                                 .padding(16)
-                                .background(colors.muted)
+                                .background(colors.background)
+                                .testID("showcase.preview.default")
                             }
                         }
                         .padding(20)
@@ -897,10 +1125,35 @@ public struct ShowcaseDetailScreen: Component {
                         .testID("showcase.preview.container")
                     }
                 }
+
+                // Scenario-Isolated Local State & Event Readout
+                if let exStore = exampleStore {
+                    VStack(alignment: .start, spacing: 6) {
+                        Text("Scenario Local State & Event Readout:")
+                            .font(.mono)
+                            .foregroundColor(colors.mutedForeground)
+
+                        Text("ID: \(item.id) | State: \(exStore.state.selectedState) | Variant: \(exStore.state.selectedVariant) | Count: \(exStore.state.localCount) | Last: \(exStore.state.lastAction)")
+                            .font(.mono)
+                            .foregroundColor(colors.foreground)
+                            .testID("showcase.detail.state_values")
+
+                        if !exStore.state.eventsLog.isEmpty {
+                            Text("Events: \(exStore.state.eventsLog.suffix(4).joined(separator: " -> "))")
+                                .font(.mono)
+                                .foregroundColor(colors.mutedForeground)
+                                .testID("showcase.detail.events_log")
+                        }
+                    }
+                    .padding(12)
+                    .background(colors.muted)
+                    .testID("showcase.detail.state_readout")
+                }
             }
             .padding(24)
         }
         .render(in: context)
+        }
     }
 }
 
