@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compatibility/migration policy; tagging and publishing remain owner actions.
 
 ### Added
+- Experimental P3 `PhoneInput`/`PhoneNumber` contracts with country-aware
+  canonical formatting and shape-only validation.
 - Experimental P3 `DateSelector` with CalendarService-backed formatting,
   min/max validation, navigation, cancellation, and focus-restore state.
 - Experimental P3 `AutocompleteEngine` and `Autocomplete` facade with debounced,
