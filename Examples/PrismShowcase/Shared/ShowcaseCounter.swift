@@ -44,9 +44,30 @@ public final class ShowcaseStore {
     private let statePipe = Pipe<ShowcaseState>()
     private let bag = SubscriptionBag()
     private var isTornDown = false
+    private var _exampleStores: [String: ShowcaseExampleStore] = [:]
 
     public var onChange: (@MainActor (RenderElement) -> Void)?
     public var onThemeChange: (@MainActor (Theme) -> Void)?
+
+    /// Returns or creates an isolated scenario store for the given component ID.
+    public func exampleStore(for componentID: String) -> ShowcaseExampleStore {
+        if let existing = _exampleStores[componentID] {
+            return existing
+        }
+        let item = ShowcaseRegistry.item(for: componentID)
+        let initialStates = item?.states ?? []
+        let initialVariants = item?.availableVariants ?? []
+        let store = ShowcaseExampleStore(
+            componentID: componentID,
+            initialState: initialStates.first ?? "default",
+            initialVariant: initialVariants.first ?? "default"
+        )
+        store.onChange = { [weak self] in
+            self?.publish()
+        }
+        _exampleStores[componentID] = store
+        return store
+    }
 
     public var state: ShowcaseState {
         _state
@@ -262,6 +283,10 @@ public final class ShowcaseStore {
         isTornDown = true
         statePipe.finish()
         bag.cancelAll()
+        for (_, store) in _exampleStores {
+            store.teardown()
+        }
+        _exampleStores.removeAll()
         onChange = nil
         onThemeChange = nil
     }

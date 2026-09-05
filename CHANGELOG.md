@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   during reconciliation.
 
 ### Added
+- Interactive Demo Registry and Detail Playground (Task 23f): Unified typed component
+  descriptors for all audited components (`ShowcaseComponentItem`) containing stable IDs,
+  titles, category, public symbols, maturity ratings (`p0Core`, `p1Standard`, `p2Advanced`,
+  `p3Experimental`), platform capabilities, source paths, documentation paths, and status
+  (`.ready`, `.incomplete(owner:gap:)`, `.grouped(parent:)`). Detail playground container
+  with metadata badges, state and variant selectors, live preview area, scenario-isolated
+  state management (`ShowcaseExampleStore`), local state and event readout, scenario-local
+  Reset action, explicit incomplete implementation banners (`showcase.detail.incomplete`)
+  eliminating silent generic fallback, real interactive Accordion expanding/collapsing, and
+  10 comprehensive unit tests in `ShowcaseRegistryTests`.
 - `Examples/PrismShowcase`: shared Prism showcase screen with separate iOS/iPadOS
   and macOS application targets, UI-test bundles, and a repeatable local build
   and test command.
